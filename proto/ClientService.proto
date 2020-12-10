@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package client_service;
+
+option go_package = "client_service;proto";
+
+message GetIPRequest {
+    string direccion = 1;  
+}
+
+message GetIPResponse {
+    string ip = 1;
+    repeated int64 clock = 2;
+}
+
+service ClientService {
+    rpc GetIP (GetIPRequest) returns (GetIPResponse) {}
+   
+}
