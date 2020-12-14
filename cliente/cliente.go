@@ -4,12 +4,21 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"strings"
 	pb "github.com/sirbernal/lab3SD/proto/client_service"
 	"google.golang.org/grpc"
 
 )
 
 var timeout = time.Duration(1)*time.Second
+
+func DetectCommand(comm string)[]string{
+	str:= strings.Split(comm, " ")
+	var resp []string
+	resp=append(resp,strings.ToLower(str[0]))
+	resp=append(resp,strings.Join(str[1:]," "))
+	return resp
+}
 
 func SolicitarIP(){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
@@ -34,8 +43,7 @@ func SolicitarIP(){
 
 
 func main() {
-	
+	fmt.Println(DetectCommand("Hola, que sucede mi pana"))
 	fmt.Println("Hola")
-	SolicitarIP()
-
+	//SolicitarIP()
 }
