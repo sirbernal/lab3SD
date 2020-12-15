@@ -7,7 +7,8 @@ import (
 	"strings"
 	pb "github.com/sirbernal/lab3SD/proto/admin_service"
 	"google.golang.org/grpc"
-
+	"bufio"
+	"os"
 )
 
 var timeout = time.Duration(1)*time.Second
@@ -17,7 +18,6 @@ func DetectCommand(comm string)[]string{
 	var resp []string
 	resp=append(resp,strings.ToLower(str[0]))
 	resp=append(resp,strings.Join(str[1:]," "))
-	fmt.Println(resp)
 	return resp
 }
 
@@ -91,11 +91,11 @@ func Delete(url string, ip string){
 }
 
 func main() {
-	var comando string
+	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Hola, puede escribir su opcion")
 	for{
-		_,_ = fmt.Scanln(&comando)
-		comandos := DetectCommand2(comando)
+		text, _ := reader.ReadString('\n')
+		comandos := DetectCommand(text)
 		switch comandos[0]{
 			case "create","append":
 				fmt.Println("Escribio crear")

@@ -18,6 +18,7 @@ func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResp
 	return &pb.GetIPResponse{Ip: "192.168.0.1",Clock: []int64{} }, nil
 }
 
+
 func main() {
 	fmt.Println("Broker corriendo")
 
