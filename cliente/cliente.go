@@ -31,7 +31,7 @@ func SolicitarIP(){
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	msg:= &pb.GetIPRequest{Direccion: "google.com" } //envia la consulta por medio de la palabra "status"
+	msg:= &pb.GetIPRequest{Direccion: "google.com" } //envia la consulta por medio de la palabra "direccion"
 
 	resp, err := client.GetIP(ctx, msg)
 	if err != nil {

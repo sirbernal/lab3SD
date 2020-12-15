@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package admin_service;
+
+option go_package = "admin_service;proto";
+
+message AppendRequest {
+    string url = 1;
+    string ip = 2;
+}
+
+message AppendResponse {
+    string status = 1;
+}
+
+message UpdateRequest {
+    string url = 1;
+    string ip = 2;
+    string option = 3;
+}
+
+message UpdateResponse {
+    string status = 1;
+}
+
+message DeleteRequest {
+    string url = 1;
+}
+
+message DeleteResponse {
+    string status = 1;
+}
+
+service AdminService {
+    rpc Append (AppendRequest) returns (AppendResponse) {}
+    rpc Update (UpdateRequest) returns (UpdateResponse) {}
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {}
+}
