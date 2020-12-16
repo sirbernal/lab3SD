@@ -69,7 +69,7 @@ func Update(url string, ip string, option string){
 	fmt.Println(resp.GetStatus())
 }
 
-func Delete(url string, ip string){
+func Delete(url string){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -98,13 +98,28 @@ func main() {
 		comandos := DetectCommand(text)
 		switch comandos[0]{
 			case "create","append":
-				fmt.Println("Escribio crear")
+				//fmt.Println("Escribio crear")
+				str := strings.Split(comandos[1], " ")
+				Create(str[0], str[1])
 
 			case "update":
-				fmt.Println("Escribio subida")
+				//fmt.Println("Escribio subida")
+				str := strings.Split(comandos[1], " ")
+				option := " "
+				fmt.Println(str[1])
+				fmt.Println(strings.Count(str[1], "."))
+				
+				if strings.Count(str[1], ".") == 3{
+					option = "ip"
+				}else{
+					option = "dire"
+				}
+				Update(str[0], str[1], option)
 				
 			case "delete":
-				fmt.Println("Escribio borrar")	
+				fmt.Println("Escribio borrar")
+				Delete(comandos[1])
+
 
 		}	
 		comandos = []string{}
