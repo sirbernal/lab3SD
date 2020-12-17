@@ -1,18 +1,25 @@
 package main
 
 import (
-	//"context"
+	"context"
 	"fmt"
 	//"time"
 	"strings"
 	"bufio"
 	"os"
 	"log"
+	"net"
+
 	//pb "github.com/sirbernal/lab3SD/proto/client_service"
-	//"google.golang.org/grpc"
+	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
+	"google.golang.org/grpc"
 
 )
 
+type server struct {
+}
+
+var clock = []int64{0,0,0}
 var regmem [][]string
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
@@ -67,6 +74,10 @@ func ActReg(){
 	file.Close()
 }
 
+func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {
+	return &pb3.GetClockResponse{Clock: clock}  , nil
+}
+
 
 func main() {
 	InitReg()
@@ -77,4 +88,16 @@ func main() {
 	regmem=append(regmem,[]string{"asd","4"})
 	ActReg()
 	fmt.Println(regmem)
+
+
+	lis, err := net.Listen("tcp", ":50052")
+	if err != nil {
+		log.Fatal("Error conectando: %v", err)
+	}
+	s := grpc.NewServer()
+
+	pb3.RegisterDNSServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

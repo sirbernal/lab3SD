@@ -11,6 +11,8 @@ import (
 	"os"
 )
 
+var dires = []string{"localhost:50051"}
+
 var timeout = time.Duration(1)*time.Second
 
 func DetectCommand(comm string)[]string{
@@ -26,7 +28,7 @@ func DetectCommand2(comm string)[]string{
 	fmt.Println(str[1])
 	return str
 }
-
+/*
 func Create(url string, ip string){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
@@ -46,8 +48,8 @@ func Create(url string, ip string){
 	}
 
 	fmt.Println(resp.GetStatus())
-}
-
+} */
+/*
 func Update(url string, ip string, option string){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
@@ -67,8 +69,8 @@ func Update(url string, ip string, option string){
 	}
 
 	fmt.Println(resp.GetStatus())
-}
-
+} */
+/*
 func Delete(url string){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
@@ -89,7 +91,29 @@ func Delete(url string){
 
 	fmt.Println(resp.GetStatus())
 }
+*/
 
+func Broker(action string){
+	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
+	if err != nil {
+		fmt.Println("Problemas al hacer conexion")
+	}
+	defer conn.Close()
+
+	client := pb.NewAdminServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	msg:= &pb.BrokerRequest{Action: action} //envia la consulta por medio de la palabra "status"
+
+	msg2, err := client.Broker(ctx, msg)
+	if err != nil {
+		fmt.Println("Error, no esta el server conectado ")
+	}
+
+	fmt.Println(msg2.GetClock())
+
+}
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Hola, puede escribir su opcion")
@@ -99,26 +123,28 @@ func main() {
 		switch comandos[0]{
 			case "create","append":
 				//fmt.Println("Escribio crear")
-				str := strings.Split(comandos[1], " ")
-				Create(str[0], str[1])
+				//str := strings.Split(comandos[1], " ")
+				Broker("create")
+				//Create(str[0], str[1])
 
 			case "update":
 				//fmt.Println("Escribio subida")
-				str := strings.Split(comandos[1], " ")
-				option := " "
-				fmt.Println(str[1])
-				fmt.Println(strings.Count(str[1], "."))
-				
-				if strings.Count(str[1], ".") == 3{
+				//str := strings.Split(comandos[1], " ")
+				//option := " "
+
+				/*if strings.Count(str[1], ".") == 3{
 					option = "ip"
 				}else{
 					option = "dire"
-				}
-				Update(str[0], str[1], option)
+				} */
+
+				Broker("update")
+				//Update(str[0], str[1], option)
 				
 			case "delete":
-				fmt.Println("Escribio borrar")
-				Delete(comandos[1])
+				Broker("delete")
+				//fmt.Println("Escribio borrar")
+				//Delete(comandos[1])
 
 
 		}	

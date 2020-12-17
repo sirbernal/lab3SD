@@ -4,35 +4,26 @@ package admin_service;
 
 option go_package = "admin_service;proto";
 
-message AppendRequest {
-    string url = 1;
-    string ip = 2;
+message BrokerRequest {
+    string action = 1;
 }
 
-message AppendResponse {
-    string status = 1;
+message BrokerResponse {
+    string ip = 1;
+    repeated int64 clock = 2;
 }
 
-message UpdateRequest {
-    string url = 1;
-    string ip = 2;
-    string option = 3;
+message DnsCommandRequest {
+    repeated int64 command = 2;
 }
 
-message UpdateResponse {
-    string status = 1;
+message DnsCommandResponse {
+    string ip = 1;
+    repeated int64 clock = 2;
 }
 
-message DeleteRequest {
-    string url = 1;
-}
-
-message DeleteResponse {
-    string status = 1;
-}
 
 service AdminService {
-    rpc Append (AppendRequest) returns (AppendResponse) {}
-    rpc Update (UpdateRequest) returns (UpdateResponse) {}
-    rpc Delete (DeleteRequest) returns (DeleteResponse) {}
+    rpc Broker (BrokerRequest) returns (BrokerResponse) {}
+    rpc DnsCommand(DnsCommandRequest) returns (DnsCommandResponse) {}
 }

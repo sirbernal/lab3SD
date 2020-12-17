@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package dns_service;
+
+option go_package = "dns_service;proto";
+
+message GetClockRequest {
+    string soli = 1;
+}
+
+message GetClockResponse {
+    repeated int64 clock = 1;
+}
+
+
+service DNSService {
+    rpc GetClock (GetClockRequest) returns (GetClockResponse) {}
+}

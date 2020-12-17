@@ -29,17 +29,16 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type AppendRequest struct {
+type BrokerRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Ip  string `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
 }
 
-func (x *AppendRequest) Reset() {
-	*x = AppendRequest{}
+func (x *BrokerRequest) Reset() {
+	*x = BrokerRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_AdminService_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -47,13 +46,13 @@ func (x *AppendRequest) Reset() {
 	}
 }
 
-func (x *AppendRequest) String() string {
+func (x *BrokerRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AppendRequest) ProtoMessage() {}
+func (*BrokerRequest) ProtoMessage() {}
 
-func (x *AppendRequest) ProtoReflect() protoreflect.Message {
+func (x *BrokerRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_AdminService_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -65,35 +64,29 @@ func (x *AppendRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AppendRequest.ProtoReflect.Descriptor instead.
-func (*AppendRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use BrokerRequest.ProtoReflect.Descriptor instead.
+func (*BrokerRequest) Descriptor() ([]byte, []int) {
 	return file_proto_AdminService_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AppendRequest) GetUrl() string {
+func (x *BrokerRequest) GetAction() string {
 	if x != nil {
-		return x.Url
+		return x.Action
 	}
 	return ""
 }
 
-func (x *AppendRequest) GetIp() string {
-	if x != nil {
-		return x.Ip
-	}
-	return ""
-}
-
-type AppendResponse struct {
+type BrokerResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Ip    string  `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
+	Clock []int64 `protobuf:"varint,2,rep,packed,name=clock,proto3" json:"clock,omitempty"`
 }
 
-func (x *AppendResponse) Reset() {
-	*x = AppendResponse{}
+func (x *BrokerResponse) Reset() {
+	*x = BrokerResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_AdminService_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -101,13 +94,13 @@ func (x *AppendResponse) Reset() {
 	}
 }
 
-func (x *AppendResponse) String() string {
+func (x *BrokerResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AppendResponse) ProtoMessage() {}
+func (*BrokerResponse) ProtoMessage() {}
 
-func (x *AppendResponse) ProtoReflect() protoreflect.Message {
+func (x *BrokerResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_AdminService_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -119,30 +112,35 @@ func (x *AppendResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AppendResponse.ProtoReflect.Descriptor instead.
-func (*AppendResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use BrokerResponse.ProtoReflect.Descriptor instead.
+func (*BrokerResponse) Descriptor() ([]byte, []int) {
 	return file_proto_AdminService_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AppendResponse) GetStatus() string {
+func (x *BrokerResponse) GetIp() string {
 	if x != nil {
-		return x.Status
+		return x.Ip
 	}
 	return ""
 }
 
-type UpdateRequest struct {
+func (x *BrokerResponse) GetClock() []int64 {
+	if x != nil {
+		return x.Clock
+	}
+	return nil
+}
+
+type DnsCommandRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url    string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Ip     string `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
-	Option string `protobuf:"bytes,3,opt,name=option,proto3" json:"option,omitempty"`
+	Command []int64 `protobuf:"varint,2,rep,packed,name=command,proto3" json:"command,omitempty"`
 }
 
-func (x *UpdateRequest) Reset() {
-	*x = UpdateRequest{}
+func (x *DnsCommandRequest) Reset() {
+	*x = DnsCommandRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_AdminService_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -150,13 +148,13 @@ func (x *UpdateRequest) Reset() {
 	}
 }
 
-func (x *UpdateRequest) String() string {
+func (x *DnsCommandRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateRequest) ProtoMessage() {}
+func (*DnsCommandRequest) ProtoMessage() {}
 
-func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
+func (x *DnsCommandRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_AdminService_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -168,42 +166,29 @@ func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateRequest.ProtoReflect.Descriptor instead.
-func (*UpdateRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DnsCommandRequest.ProtoReflect.Descriptor instead.
+func (*DnsCommandRequest) Descriptor() ([]byte, []int) {
 	return file_proto_AdminService_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *UpdateRequest) GetUrl() string {
+func (x *DnsCommandRequest) GetCommand() []int64 {
 	if x != nil {
-		return x.Url
+		return x.Command
 	}
-	return ""
+	return nil
 }
 
-func (x *UpdateRequest) GetIp() string {
-	if x != nil {
-		return x.Ip
-	}
-	return ""
-}
-
-func (x *UpdateRequest) GetOption() string {
-	if x != nil {
-		return x.Option
-	}
-	return ""
-}
-
-type UpdateResponse struct {
+type DnsCommandResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Ip    string  `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
+	Clock []int64 `protobuf:"varint,2,rep,packed,name=clock,proto3" json:"clock,omitempty"`
 }
 
-func (x *UpdateResponse) Reset() {
-	*x = UpdateResponse{}
+func (x *DnsCommandResponse) Reset() {
+	*x = DnsCommandResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_AdminService_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -211,13 +196,13 @@ func (x *UpdateResponse) Reset() {
 	}
 }
 
-func (x *UpdateResponse) String() string {
+func (x *DnsCommandResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateResponse) ProtoMessage() {}
+func (*DnsCommandResponse) ProtoMessage() {}
 
-func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
+func (x *DnsCommandResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_AdminService_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -229,110 +214,23 @@ func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateResponse.ProtoReflect.Descriptor instead.
-func (*UpdateResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use DnsCommandResponse.ProtoReflect.Descriptor instead.
+func (*DnsCommandResponse) Descriptor() ([]byte, []int) {
 	return file_proto_AdminService_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpdateResponse) GetStatus() string {
+func (x *DnsCommandResponse) GetIp() string {
 	if x != nil {
-		return x.Status
+		return x.Ip
 	}
 	return ""
 }
 
-type DeleteRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-}
-
-func (x *DeleteRequest) Reset() {
-	*x = DeleteRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_AdminService_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteRequest) ProtoMessage() {}
-
-func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_AdminService_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
-func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_AdminService_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *DeleteRequest) GetUrl() string {
+func (x *DnsCommandResponse) GetClock() []int64 {
 	if x != nil {
-		return x.Url
+		return x.Clock
 	}
-	return ""
-}
-
-type DeleteResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-}
-
-func (x *DeleteResponse) Reset() {
-	*x = DeleteResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_AdminService_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteResponse) ProtoMessage() {}
-
-func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_AdminService_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
-func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_AdminService_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *DeleteResponse) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
+	return nil
 }
 
 var File_proto_AdminService_proto protoreflect.FileDescriptor
@@ -340,39 +238,30 @@ var File_proto_AdminService_proto protoreflect.FileDescriptor
 var file_proto_AdminService_proto_rawDesc = []byte{
 	0x0a, 0x18, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0d, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x22, 0x31, 0x0a, 0x0d, 0x41, 0x70, 0x70,
-	0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72,
-	0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x0e, 0x0a, 0x02,
-	0x69, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x22, 0x28, 0x0a, 0x0e,
-	0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16,
-	0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
-	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x49, 0x0a, 0x0d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x70, 0x74,
-	0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x22, 0x28, 0x0a, 0x0e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x21, 0x0a, 0x0d, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03,
-	0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x28,
-	0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x32, 0xe9, 0x01, 0x0a, 0x0c, 0x41, 0x64, 0x6d,
-	0x69, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x47, 0x0a, 0x06, 0x41, 0x70, 0x70,
-	0x65, 0x6e, 0x64, 0x12, 0x1c, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x2e, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x1d, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x2e, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x47, 0x0a, 0x06, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x1c, 0x2e, 0x61,
-	0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x70, 0x64,
-	0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x61, 0x64, 0x6d,
-	0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74,
-	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x47, 0x0a, 0x06, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x1c, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x22, 0x27, 0x0a, 0x0d, 0x42, 0x72, 0x6f,
+	0x6b, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x22, 0x36, 0x0a, 0x0e, 0x42, 0x72, 0x6f, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x02, 0x69, 0x70, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x18, 0x02, 0x20,
+	0x03, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x22, 0x2d, 0x0a, 0x11, 0x44, 0x6e,
+	0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x03, 0x28, 0x03,
+	0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x22, 0x3a, 0x0a, 0x12, 0x44, 0x6e, 0x73,
+	0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12,
+	0x14, 0x0a, 0x05, 0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x18, 0x02, 0x20, 0x03, 0x28, 0x03, 0x52, 0x05,
+	0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x32, 0xac, 0x01, 0x0a, 0x0c, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x53,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x47, 0x0a, 0x06, 0x42, 0x72, 0x6f, 0x6b, 0x65, 0x72,
+	0x12, 0x1c, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x2e, 0x42, 0x72, 0x6f, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d,
+	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x42,
+	0x72, 0x6f, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x53, 0x0a, 0x0a, 0x44, 0x6e, 0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x20, 0x2e,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x44, 0x6e,
+	0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x21, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e,
+	0x44, 0x6e, 0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x22, 0x00, 0x42, 0x15, 0x5a, 0x13, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x73, 0x65,
 	0x72, 0x76, 0x69, 0x63, 0x65, 0x3b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x33,
@@ -390,24 +279,20 @@ func file_proto_AdminService_proto_rawDescGZIP() []byte {
 	return file_proto_AdminService_proto_rawDescData
 }
 
-var file_proto_AdminService_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_AdminService_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_AdminService_proto_goTypes = []interface{}{
-	(*AppendRequest)(nil),  // 0: admin_service.AppendRequest
-	(*AppendResponse)(nil), // 1: admin_service.AppendResponse
-	(*UpdateRequest)(nil),  // 2: admin_service.UpdateRequest
-	(*UpdateResponse)(nil), // 3: admin_service.UpdateResponse
-	(*DeleteRequest)(nil),  // 4: admin_service.DeleteRequest
-	(*DeleteResponse)(nil), // 5: admin_service.DeleteResponse
+	(*BrokerRequest)(nil),      // 0: admin_service.BrokerRequest
+	(*BrokerResponse)(nil),     // 1: admin_service.BrokerResponse
+	(*DnsCommandRequest)(nil),  // 2: admin_service.DnsCommandRequest
+	(*DnsCommandResponse)(nil), // 3: admin_service.DnsCommandResponse
 }
 var file_proto_AdminService_proto_depIdxs = []int32{
-	0, // 0: admin_service.AdminService.Append:input_type -> admin_service.AppendRequest
-	2, // 1: admin_service.AdminService.Update:input_type -> admin_service.UpdateRequest
-	4, // 2: admin_service.AdminService.Delete:input_type -> admin_service.DeleteRequest
-	1, // 3: admin_service.AdminService.Append:output_type -> admin_service.AppendResponse
-	3, // 4: admin_service.AdminService.Update:output_type -> admin_service.UpdateResponse
-	5, // 5: admin_service.AdminService.Delete:output_type -> admin_service.DeleteResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	0, // 0: admin_service.AdminService.Broker:input_type -> admin_service.BrokerRequest
+	2, // 1: admin_service.AdminService.DnsCommand:input_type -> admin_service.DnsCommandRequest
+	1, // 2: admin_service.AdminService.Broker:output_type -> admin_service.BrokerResponse
+	3, // 3: admin_service.AdminService.DnsCommand:output_type -> admin_service.DnsCommandResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -420,7 +305,7 @@ func file_proto_AdminService_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_proto_AdminService_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AppendRequest); i {
+			switch v := v.(*BrokerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -432,7 +317,7 @@ func file_proto_AdminService_proto_init() {
 			}
 		}
 		file_proto_AdminService_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AppendResponse); i {
+			switch v := v.(*BrokerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -444,7 +329,7 @@ func file_proto_AdminService_proto_init() {
 			}
 		}
 		file_proto_AdminService_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateRequest); i {
+			switch v := v.(*DnsCommandRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -456,31 +341,7 @@ func file_proto_AdminService_proto_init() {
 			}
 		}
 		file_proto_AdminService_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_proto_AdminService_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_proto_AdminService_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteResponse); i {
+			switch v := v.(*DnsCommandResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -498,7 +359,7 @@ func file_proto_AdminService_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_AdminService_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -524,9 +385,8 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AdminServiceClient interface {
-	Append(ctx context.Context, in *AppendRequest, opts ...grpc.CallOption) (*AppendResponse, error)
-	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
-	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Broker(ctx context.Context, in *BrokerRequest, opts ...grpc.CallOption) (*BrokerResponse, error)
+	DnsCommand(ctx context.Context, in *DnsCommandRequest, opts ...grpc.CallOption) (*DnsCommandResponse, error)
 }
 
 type adminServiceClient struct {
@@ -537,27 +397,18 @@ func NewAdminServiceClient(cc grpc.ClientConnInterface) AdminServiceClient {
 	return &adminServiceClient{cc}
 }
 
-func (c *adminServiceClient) Append(ctx context.Context, in *AppendRequest, opts ...grpc.CallOption) (*AppendResponse, error) {
-	out := new(AppendResponse)
-	err := c.cc.Invoke(ctx, "/admin_service.AdminService/Append", in, out, opts...)
+func (c *adminServiceClient) Broker(ctx context.Context, in *BrokerRequest, opts ...grpc.CallOption) (*BrokerResponse, error) {
+	out := new(BrokerResponse)
+	err := c.cc.Invoke(ctx, "/admin_service.AdminService/Broker", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *adminServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
-	out := new(UpdateResponse)
-	err := c.cc.Invoke(ctx, "/admin_service.AdminService/Update", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *adminServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
-	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/admin_service.AdminService/Delete", in, out, opts...)
+func (c *adminServiceClient) DnsCommand(ctx context.Context, in *DnsCommandRequest, opts ...grpc.CallOption) (*DnsCommandResponse, error) {
+	out := new(DnsCommandResponse)
+	err := c.cc.Invoke(ctx, "/admin_service.AdminService/DnsCommand", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -566,79 +417,57 @@ func (c *adminServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts
 
 // AdminServiceServer is the server API for AdminService service.
 type AdminServiceServer interface {
-	Append(context.Context, *AppendRequest) (*AppendResponse, error)
-	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	Broker(context.Context, *BrokerRequest) (*BrokerResponse, error)
+	DnsCommand(context.Context, *DnsCommandRequest) (*DnsCommandResponse, error)
 }
 
 // UnimplementedAdminServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedAdminServiceServer struct {
 }
 
-func (*UnimplementedAdminServiceServer) Append(context.Context, *AppendRequest) (*AppendResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Append not implemented")
+func (*UnimplementedAdminServiceServer) Broker(context.Context, *BrokerRequest) (*BrokerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Broker not implemented")
 }
-func (*UnimplementedAdminServiceServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
-}
-func (*UnimplementedAdminServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+func (*UnimplementedAdminServiceServer) DnsCommand(context.Context, *DnsCommandRequest) (*DnsCommandResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DnsCommand not implemented")
 }
 
 func RegisterAdminServiceServer(s *grpc.Server, srv AdminServiceServer) {
 	s.RegisterService(&_AdminService_serviceDesc, srv)
 }
 
-func _AdminService_Append_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AppendRequest)
+func _AdminService_Broker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BrokerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).Append(ctx, in)
+		return srv.(AdminServiceServer).Broker(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/admin_service.AdminService/Append",
+		FullMethod: "/admin_service.AdminService/Broker",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).Append(ctx, req.(*AppendRequest))
+		return srv.(AdminServiceServer).Broker(ctx, req.(*BrokerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateRequest)
+func _AdminService_DnsCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DnsCommandRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).Update(ctx, in)
+		return srv.(AdminServiceServer).DnsCommand(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/admin_service.AdminService/Update",
+		FullMethod: "/admin_service.AdminService/DnsCommand",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).Update(ctx, req.(*UpdateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AdminService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AdminServiceServer).Delete(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/admin_service.AdminService/Delete",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).Delete(ctx, req.(*DeleteRequest))
+		return srv.(AdminServiceServer).DnsCommand(ctx, req.(*DnsCommandRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -648,16 +477,12 @@ var _AdminService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*AdminServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Append",
-			Handler:    _AdminService_Append_Handler,
+			MethodName: "Broker",
+			Handler:    _AdminService_Broker_Handler,
 		},
 		{
-			MethodName: "Update",
-			Handler:    _AdminService_Update_Handler,
-		},
-		{
-			MethodName: "Delete",
-			Handler:    _AdminService_Delete_Handler,
+			MethodName: "DnsCommand",
+			Handler:    _AdminService_DnsCommand_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
