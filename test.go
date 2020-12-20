@@ -3,26 +3,32 @@ package main
 import (
 
 	"fmt"
-	"time"
+	"strings"
+	//"time"
 )
 
-func changer(){
-	for{
-		time.Sleep(time.Duration(3)*time.Second)
-		variable[0] ++ 
-		variable[1] ++ 
-		variable[2] ++ 
-		fmt.Println(variable)
-	}
-	
+func DetectCommand(comm string)[]string{
+	str:= strings.Split(comm, " ")
+	var resp []string
+	resp=append(resp,strings.ToLower(str[0]))
+	resp=append(resp,strings.Join(str[1:]," "))
+	return resp
+}
+func DetectDomain(comm string)string{
+	str:= strings.Split(comm, " ")
+	dom:=strings.Split(str[0],".")
+	return dom[1]
+}
+func RemoveIndex(s [][][]string, index int) [][][]string {
+	return append(s[:index], s[index+1:]...)
 }
 
-var variable = []int{1,2,3}
-
 func main() {
-	go changer()
-	time.Sleep(time.Duration(3)*time.Second)
-	go changer()
-	time.Sleep(time.Duration(10000)*time.Second)
-
+	var asd [][][]string
+	asd=append(asd, [][]string{})
+	asd=append(asd, [][]string{})
+	asd=append(asd, [][]string{})
+	fmt.Println(len(asd))
+	asd=RemoveIndex(asd,1)
+	fmt.Println(len(asd))
 }
