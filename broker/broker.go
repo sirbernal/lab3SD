@@ -43,7 +43,7 @@ func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.Broke
 }
 
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
-	return &pb2.DnsCommandResponse{Ip: "192.168.0.1",Clock: []int64{} }, nil
+	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
 
 

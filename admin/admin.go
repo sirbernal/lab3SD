@@ -92,6 +92,25 @@ func Delete(url string){
 	fmt.Println(resp.GetStatus())
 }
 */
+func CommandtoDNS(action []string){
+	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure()) //genera la conexion con el broker
+	if err != nil {
+		fmt.Println("Problemas al hacer conexion")
+	}
+	defer conn.Close()
+
+	client := pb.NewAdminServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	msg:= &pb.DnsCommandRequest{Command: action} 
+
+	_, err = client.DnsCommand(ctx, msg)
+	if err != nil {
+		fmt.Println("Error, no esta el server conectado ")
+	}
+
+}
 
 func Broker(action string){
 	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
@@ -120,6 +139,13 @@ func main() {
 	for{
 		text, _ := reader.ReadString('\n')
 		comandos := DetectCommand(text)
+		str := strings.Split(comandos[1], "\n")
+		fmt.Println(str[0])
+		fmt.Println(str[1])
+		CommandtoDNS(comandos)
+		comandos = []string{}
+		/*
+		
 		switch comandos[0]{
 			case "create","append":
 				//fmt.Println("Escribio crear")
@@ -138,16 +164,16 @@ func main() {
 					option = "dire"
 				} */
 
-				Broker("update")
+				//Broker("update")
 				//Update(str[0], str[1], option)
 				
-			case "delete":
-				Broker("delete")
+			//case "delete":
+				//Broker("delete")
 				//fmt.Println("Escribio borrar")
 				//Delete(comandos[1])
 
 
-		}	
+		
 		comandos = []string{}
 	}
 

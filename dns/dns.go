@@ -11,6 +11,7 @@ import (
 	"net"
 
 	//pb "github.com/sirbernal/lab3SD/proto/client_service"
+	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
 	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
 	"google.golang.org/grpc"
 
@@ -154,10 +155,23 @@ func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.G
 	return &pb3.GetClockResponse{Clock: clock}  , nil
 }
 
+func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
+	
+	fmt.Println("llego: ", msg.GetCommand() )
+	fmt.Println( msg.GetCommand()[0] )
+	fmt.Println( msg.GetCommand()[1] )
+	fmt.Println( len(msg.GetCommand()))
+	ReceiveOp(msg.GetCommand())
+	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
+}
+
+func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) {
+	return &pb2.BrokerResponse{Ip: "192.168.0.1",Clock: []int64{}}, nil
+}
 
 func main() {
-	ReceiveOp([]string{"append","google.cl aquiIP"})
-	ReceiveOp([]string{"append","google.com Ipqlia"})
+	//ReceiveOp([]string{"append","google.cl aquiIP"})
+	/*ReceiveOp([]string{"append","google.com Ipqlia"})
 	ReceiveOp([]string{"append","asd.cl asdhj"})
 	ReceiveOp([]string{"append","lel.zz sadkjasdh"})
 	ReceiveOp([]string{"delete","google.cl"})
@@ -165,7 +179,8 @@ func main() {
 	ReceiveOp([]string{"append","lul.zz ñaña"})
 	ReceiveOp([]string{"update","lel.zz holi"})
 	ReceiveOp([]string{"update","lel.zz asd"})
-	fmt.Println(pags)
+	fmt.Println(pags) */
+	
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
@@ -173,6 +188,7 @@ func main() {
 	s := grpc.NewServer()
 
 	pb3.RegisterDNSServiceServer(s, &server{})
+	pb2.RegisterAdminServiceServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

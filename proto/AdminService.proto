@@ -14,11 +14,10 @@ message BrokerResponse {
 }
 
 message DnsCommandRequest {
-    repeated int64 command = 2;
+    repeated string command = 2;
 }
 
 message DnsCommandResponse {
-    string ip = 1;
     repeated int64 clock = 2;
 }
 
