@@ -4,6 +4,14 @@ package admin_service;
 
 option go_package = "admin_service;proto";
 
+message RegAdmRequest {
+    string reg = 1;
+}
+
+message RegAdmResponse {
+    int64 id = 1;
+}
+
 message BrokerRequest {
     string action = 1;
 }
@@ -23,6 +31,7 @@ message DnsCommandResponse {
 
 
 service AdminService {
+    rpc RegAdm(RegAdmRequest) returns (RegAdmResponse) {}
     rpc Broker (BrokerRequest) returns (BrokerResponse) {}
     rpc DnsCommand(DnsCommandRequest) returns (DnsCommandResponse) {}
 }

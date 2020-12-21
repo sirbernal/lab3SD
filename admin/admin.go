@@ -15,6 +15,8 @@ var dires = []string{"localhost:50051"}
 
 var timeout = time.Duration(1)*time.Second
 
+var id_admin int64
+
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
 	var resp []string
@@ -92,6 +94,30 @@ func Delete(url string){
 	fmt.Println(resp.GetStatus())
 }
 */
+
+func RegAdmin(){
+	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
+	if err != nil {
+		fmt.Println("Problemas al hacer conexion")
+	}
+	defer conn.Close()
+
+	client := pb.NewAdminServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	msg:= &pb.RegAdmRequest{Reg: "registro"} 
+
+	resp, err := client.RegAdm(ctx, msg)
+	if err != nil {
+		fmt.Println("Error, no esta el server conectado ")
+	}
+	fmt.Println(resp.GetId())
+	id_admin = resp.GetId()
+
+
+}
+
 func CommandtoDNS(action []string){
 	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
@@ -134,15 +160,22 @@ func Broker(action string){
 
 }
 func main() {
+	RegAdmin()
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Hola, puede escribir su opcion")
 	for{
+		// Se descompone el string creado para hacer los envios correspondientes
 		text, _ := reader.ReadString('\n')
 		comandos := DetectCommand(text)
 		str := strings.Split(comandos[1], "\n")
-		fmt.Println(str[0])
-		fmt.Println(str[1])
-		CommandtoDNS(comandos)
+		new_comandos := []string{comandos[0],str[0]}
+		
+		// primero se solicita la ip del dns al broker 
+		Broker(comandos[0])
+
+
+		// Segundo, se envia los comandos al dns designado x broker
+		CommandtoDNS(new_comandos)
 		comandos = []string{}
 		/*
 		

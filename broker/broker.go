@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 var timeout = time.Duration(1)*time.Second
-
+var id = int64(0)
 type server struct {
 }
 
@@ -66,6 +66,12 @@ func (s *server) Append(ctx context.Context, msg *pb2.AppendRequest) (*pb2.Appen
 	return &pb2.DeleteResponse{Status : "recibido" }, nil
 }*/
 
+func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAdmResponse, error) {
+	id_temp := id
+	id++
+	return &pb2.RegAdmResponse{Id: id_temp }, nil
+
+}
 
 
 func main() {
