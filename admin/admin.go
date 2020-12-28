@@ -118,8 +118,8 @@ func RegAdmin(){
 
 }
 
-func CommandtoDNS(action []string){
-	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure()) //genera la conexion con el broker
+func CommandtoDNS(action []string,ipdns string){
+	conn, err := grpc.Dial(ipdns, grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
 	}
@@ -138,7 +138,7 @@ func CommandtoDNS(action []string){
 
 }
 
-func Broker(){
+func Broker()string{
 	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -156,7 +156,7 @@ func Broker(){
 		fmt.Println("Error, no esta el server conectado ")
 	}
 
-	fmt.Println(msg2.GetIp())
+	return msg2.GetIp()
 
 }
 func main() {
@@ -171,11 +171,11 @@ func main() {
 		new_comandos := []string{comandos[0],str[0]}
 		
 		// primero se solicita la ip del dns al broker 
-		Broker()
+		ipDNS:= Broker()
 
 
 		// Segundo, se envia los comandos al dns designado x broker
-		CommandtoDNS(new_comandos)
+		CommandtoDNS(new_comandos,ipDNS)
 		comandos = []string{}
 		/*
 		

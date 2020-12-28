@@ -41,12 +41,7 @@ func giveDNS(admin int64)string{//funcion que designa el dns que le corresponde 
 }
 
 func main() {
-	upRandomizer()
-	for i:=0;i<15;i++{
-		fmt.Println(giveDNS(int64(i)))
-	}
-	fmt.Println()
-	for _,j:=range idadm{
-		fmt.Println(dns[j])
-	} 
+	a:=[]int{0,0,0}
+	a[2]++
+	fmt.Println(a)
 }

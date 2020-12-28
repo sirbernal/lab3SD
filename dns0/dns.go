@@ -20,12 +20,11 @@ import (
 type server struct {
 }
 
-var clock = []int64{0,0,0}
-
+var idDNS = 0
 var dominios []string //[com,cl,ez]
 var registro [][]string //[[agregar,borrar,wea],[],[],]
 var pags [][][]string //[[[algo.com,direccion],[xd.com, direccion]],[lel.cl],[]]
-var clocks [][]int64 
+var clocks [][]int64  //[[0,0,1],[0,0,3]]
 
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
@@ -128,6 +127,7 @@ func ReceiveOp(op []string)(){ //operacion,valores
 			registro=append(registro,[]string{})
 			pags=append(pags,[][]string{})
 			pos=len(dominios)-1
+			clocks=append(clocks,[]int64{0,0,0})
 		}
 		pags[pos]=append(pags[pos],values)
 	case "update":
@@ -149,10 +149,12 @@ func ReceiveOp(op []string)(){ //operacion,valores
 		}
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
+	clocks[pos][idDNS]++
+	fmt.Println(clocks)
 	ActReg(pos)
 }
 func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {
-	return &pb3.GetClockResponse{Clock: clock}  , nil
+	return &pb3.GetClockResponse{Clock: []int64{}}  , nil
 }
 
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
@@ -166,9 +168,11 @@ func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*p
 }
 
 func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) {
-	return &pb2.BrokerResponse{Ip: "192.168.0.1",Clock: []int64{}}, nil
+	return &pb2.BrokerResponse{Ip: "192.168.0.1"}, nil
 }
-
+func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAdmResponse, error) {
+	return &pb2.RegAdmResponse{Id: 0 }, nil
+}
 func main() {
 	//ReceiveOp([]string{"append","google.cl aquiIP"})
 	/*ReceiveOp([]string{"append","google.com Ipqlia"})
