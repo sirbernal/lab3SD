@@ -173,6 +173,10 @@ func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.Broke
 func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAdmResponse, error) {
 	return &pb2.RegAdmResponse{Id: 0 }, nil
 }
+
+func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {
+	return &pb3.SendChangesResponse{Dominios: dominios}  , nil
+}
 func main() {
 	//ReceiveOp([]string{"append","google.cl aquiIP"})
 	/*ReceiveOp([]string{"append","google.com Ipqlia"})

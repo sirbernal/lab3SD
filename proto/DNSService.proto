@@ -12,7 +12,15 @@ message GetClockResponse {
     repeated int64 clock = 1;
 }
 
+message SendChangesRequest {
+    string soli = 1;
+}
+
+message SendChangesResponse {
+    repeated string dominios = 1;
+}
 
 service DNSService {
     rpc GetClock (GetClockRequest) returns (GetClockResponse) {}
+    rpc SendChanges (SendChangesRequest)  returns (SendChangesResponse) {}
 }
