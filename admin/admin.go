@@ -138,7 +138,7 @@ func CommandtoDNS(action []string){
 
 }
 
-func Broker(action string){
+func Broker(){
 	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -149,14 +149,14 @@ func Broker(action string){
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	msg:= &pb.BrokerRequest{Action: action} //envia la consulta por medio de la palabra "status"
+	msg:= &pb.BrokerRequest{AdmId: id_admin} //envia la consulta por medio de la palabra "status"
 
 	msg2, err := client.Broker(ctx, msg)
 	if err != nil {
 		fmt.Println("Error, no esta el server conectado ")
 	}
 
-	fmt.Println(msg2.GetClock())
+	fmt.Println(msg2.GetIp())
 
 }
 func main() {
@@ -171,7 +171,7 @@ func main() {
 		new_comandos := []string{comandos[0],str[0]}
 		
 		// primero se solicita la ip del dns al broker 
-		Broker(comandos[0])
+		Broker()
 
 
 		// Segundo, se envia los comandos al dns designado x broker

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	pb "github.com/sirbernal/lab3SD/proto/client_service"
 	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
-	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
+	//pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
 	"google.golang.org/grpc"
 )
 var timeout = time.Duration(1)*time.Second
@@ -26,7 +26,7 @@ func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResp
 }
 
 func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) {
-	
+	/*
 	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure()) 
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -42,8 +42,8 @@ func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.Broke
 	if err != nil {
 		fmt.Println("Error, no esta el server conectado ")
 	}
-
-	return &pb2.BrokerResponse{Ip: "192.168.0.1",Clock: clock.GetClock()}, nil
+	*/
+	return &pb2.BrokerResponse{Ip: "192.168.0.1"/*giveDNS(msg.GetAdmId())*/}, nil
 }
 
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {

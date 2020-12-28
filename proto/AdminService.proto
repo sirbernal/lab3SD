@@ -13,12 +13,11 @@ message RegAdmResponse {
 }
 
 message BrokerRequest {
-    string action = 1;
+    int64 adm_id = 1;
 }
 
 message BrokerResponse {
     string ip = 1;
-    repeated int64 clock = 2;
 }
 
 message DnsCommandRequest {
