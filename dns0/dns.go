@@ -174,6 +174,9 @@ func Merge(){
 	mergereg=[][][]string{}
 	fmt.Println(clocks)
 	fmt.Println(pags)
+
+	
+
 }
 func RealMerge(){
 	set0:= make(map[string]bool)//arreglo que guarda direcciones reservadas por prioridad del dns0
@@ -277,6 +280,12 @@ func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (
 		j,_:=strconv.Atoi(msg.GetSoli())
 		return &pb3.SendChangesResponse{Dominios:registro[j]}  , nil
 	}
+	
+}
+
+func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) {
+	
+	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
 	
 }
 

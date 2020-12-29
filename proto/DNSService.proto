@@ -20,7 +20,17 @@ message SendChangesResponse {
     repeated string dominios = 1;
 }
 
+message ReceiveChangesRequest {
+    repeated string operations = 1;
+}
+
+message ReceiveChangesResponse {
+    string status = 1;
+}
+
+
 service DNSService {
     rpc GetClock (GetClockRequest) returns (GetClockResponse) {}
     rpc SendChanges (SendChangesRequest)  returns (SendChangesResponse) {}
+    rpc ReceiveChanges(ReceiveChangesRequest) returns (ReceiveChangesResponse) {}
 }

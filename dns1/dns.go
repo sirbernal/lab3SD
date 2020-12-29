@@ -184,6 +184,12 @@ func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (
 	}
 	
 }
+
+func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) {
+	
+	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
+	
+}
 func main() {
 	/*ReceiveOp([]string{"append","google.cl aquiIP"})
 	ReceiveOp([]string{"append","google.com Ipqlia"})
