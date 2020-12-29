@@ -9,6 +9,7 @@ import (
 	"os"
 	"log"
 	"net"
+	"strconv"
 
 	//pb "github.com/sirbernal/lab3SD/proto/client_service"
 	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
@@ -175,20 +176,28 @@ func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAd
 }
 
 func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {
-	return &pb3.SendChangesResponse{Dominios: dominios}  , nil
+	if msg.GetSoli()=="Merge"{
+		return &pb3.SendChangesResponse{Dominios: dominios}  , nil
+	}else{
+		j,_:=strconv.Atoi(msg.GetSoli())
+		return &pb3.SendChangesResponse{Dominios:registro[j]}  , nil
+	}
+	
 }
 func main() {
-	//ReceiveOp([]string{"append","google.cl aquiIP"})
-	/*ReceiveOp([]string{"append","google.com Ipqlia"})
-	ReceiveOp([]string{"append","asd.cl asdhj"})
-	ReceiveOp([]string{"append","lel.zz sadkjasdh"})
+	/*ReceiveOp([]string{"append","google.cl aquiIP"})
+	ReceiveOp([]string{"append","google.com Ipqlia"})
+	ReceiveOp([]string{"append","asd.cs asdhj"})
+	ReceiveOp([]string{"append","lel.za sadkjasdh"})
 	ReceiveOp([]string{"delete","google.cl"})
-	ReceiveOp([]string{"update","google.com nueva Ip"})
-	ReceiveOp([]string{"append","lul.zz ñaña"})
-	ReceiveOp([]string{"update","lel.zz holi"})
-	ReceiveOp([]string{"update","lel.zz asd"})
-	fmt.Println(pags) */
-	
+	ReceiveOp([]string{"update","google.com ñañaña"})
+	ReceiveOp([]string{"append","lul.za ñaña"})
+	ReceiveOp([]string{"update","lel.za holi"})
+	ReceiveOp([]string{"update","lel.za asd"})
+	ReceiveOp([]string{"append","dns1.cl asdasdP"})
+	fmt.Println(dominios)
+	fmt.Println(clocks)
+	fmt.Println(pags)*/
 	lis, err := net.Listen("tcp", ":50053")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)

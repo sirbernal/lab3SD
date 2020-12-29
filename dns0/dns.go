@@ -9,7 +9,7 @@ import (
 	"os"
 	"log"
 	"net"
-
+	"strconv"
 	//pb "github.com/sirbernal/lab3SD/proto/client_service"
 	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
 	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
@@ -28,7 +28,7 @@ var clocks [][]int64  //[[0,0,1],[0,0,3]]
 var timeout = time.Duration(1)*time.Second
 var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
 var mergedns [][]string  // se guardan los dominios de los dns para hacer los merges
-var mergereg [][]string
+var mergereg [][][]string
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
 	var resp []string
@@ -118,11 +118,8 @@ func ActReg(pos int){
 	file2.Close()
 }
 func Merge(){
-
-
-	time.Sleep(time.Duration(60)*time.Second)
+	time.Sleep(time.Duration(15)*time.Second)
 	// Avisar a los demas dns que se hara un merge, por lo que ellos enviaran los dominios que ellos posean en registro
-
 	for i,dire:= range dns{
 		
 		if i == idDNS{
@@ -148,39 +145,74 @@ func Merge(){
 		}
 
 		mergedns = append(mergedns, resp.GetDominios())
-
-
 	}
-	for i,_:= range mergedns {
-		for j,_:= range mergedns[i]{
-			
+	for i,_:= range mergedns { //[]dns []dominio []registros
+		mergereg=append(mergereg,[][]string{})
+		for j,_:= range mergedns[i]{//var mergereg [][][]string .. dns0[[registros],[registros]]
+			if i==idDNS{
+				mergereg[i]=append(mergereg[i],registro[j])
+				continue
+			}
 			conn, err := grpc.Dial(dns[i], grpc.WithInsecure()) //genera la conexion con el broker
 			if err != nil {
 				fmt.Println("Problemas al hacer conexion")
 			}
 			defer conn.Close()
-
 			client := pb3.NewDNSServiceClient(conn)
-
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
 			defer cancel()
-			msg:= &pb3.SendChangesRequest{Soli: string(j)} 
-
+			msg:= &pb3.SendChangesRequest{Soli: strconv.Itoa(j)} 
 			resp, err := client.SendChanges(ctx, msg)
 			if err != nil {
 				fmt.Println("Error, no esta el server conectado ")
 			}
+			mergereg[i]=append(mergereg[i],resp.GetDominios())			
 		}
-
-		
 	}
-	
-	fmt.Println(mergedns)
-
-
+	RealMerge()
+	mergedns=[][]string{}
+	mergereg=[][][]string{}
+	fmt.Println(clocks)
+	fmt.Println(pags)
+}
+func RealMerge(){
+	set0:= make(map[string]bool)//arreglo que guarda direcciones reservadas por prioridad del dns0
+	set1:= make(map[string]bool) //arreglo que guarda direcciones reservadas por prioridad del dns1
+	for _,i:=range mergereg[0]{ //se guardan las direcciones editadas por dns0
+		for _,j:= range i{
+			value:=DivideData(j)
+			set0[value[1]]=true
+		}
+	}
+	//Se hara revision del dns 1
+	for _,i:=range mergereg[1]{
+		for _,j:= range i{
+			values:=DivideData(j)
+			if set0[values[1]]{
+				domain:=DetectDomain(values[1])
+				pos:=SearchDomain(domain)
+				clocks[pos][1]++
+				continue
+			}
+			set1[values[1]]=true
+			ReceiveOp(DetectCommand(j),1)
+		}
+	}
+	for _,i:=range mergereg[2]{
+		for _,j:= range i{
+			values:=DivideData(j)
+			if set0[values[1]]||set1[values[1]]{
+				domain:=DetectDomain(values[1])
+				pos:=SearchDomain(domain)
+				clocks[pos][2]++
+				continue
+			}
+			ReceiveOp(DetectCommand(j),2)
+		}
+	}
 }
 
-func ReceiveOp(op []string)(){ //operacion,valores
+func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
 	domain:=DetectDomain(op[1])
 	values:=DivideData(op[1])
 	pos:=SearchDomain(domain)
@@ -213,7 +245,7 @@ func ReceiveOp(op []string)(){ //operacion,valores
 		}
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
-	clocks[pos][idDNS]++
+	clocks[pos][dnsid]++
 	fmt.Println(clocks)
 	ActReg(pos)
 }
@@ -227,7 +259,7 @@ func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*p
 	fmt.Println( msg.GetCommand()[0] )
 	fmt.Println( msg.GetCommand()[1] )
 	fmt.Println( len(msg.GetCommand()))
-	ReceiveOp(msg.GetCommand())
+	ReceiveOp(msg.GetCommand(),0)
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
 
@@ -239,24 +271,32 @@ func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAd
 }
 
 func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {
-	return &pb3.SendChangesResponse{Dominios: dominios}  , nil
+	if msg.GetSoli()=="Merge"{
+		return &pb3.SendChangesResponse{Dominios: dominios}  , nil
+	}else{
+		j,_:=strconv.Atoi(msg.GetSoli())
+		return &pb3.SendChangesResponse{Dominios:registro[j]}  , nil
+	}
+	
 }
 
 
 func main() {
-	ReceiveOp([]string{"append","google.cl aquiIP"})
-	/*ReceiveOp([]string{"append","google.com Ipqlia"})
-	ReceiveOp([]string{"append","asd.cl asdhj"})
-	ReceiveOp([]string{"append","lel.zz sadkjasdh"})
-	ReceiveOp([]string{"delete","google.cl"})
-	ReceiveOp([]string{"update","google.com nueva Ip"})
-	ReceiveOp([]string{"append","lul.zz ñaña"})
-	ReceiveOp([]string{"update","lel.zz holi"})
-	ReceiveOp([]string{"update","lel.zz asd"})
-	fmt.Println(pags) */
-	go Merge()
+	/*ReceiveOp([]string{"append","google.cl aquiIP"},0)
+	ReceiveOp([]string{"append","google.com Ipqlia"},0)
+	ReceiveOp([]string{"append","asd.cl asdhj"},0)
+	ReceiveOp([]string{"append","lel.zz sadkjasdh"},0)
+	ReceiveOp([]string{"delete","google.cl"},0)
+	ReceiveOp([]string{"update","google.com nueva Ip"},0)
+	ReceiveOp([]string{"append","lul.zz ñaña"},0)
+	ReceiveOp([]string{"update","lel.zz holi"},0)
+	ReceiveOp([]string{"update","lel.zz asd"},0)*/
+	Merge()
 
 	fmt.Println(registro)
+	fmt.Println(dominios)
+	fmt.Println(clocks)
+	fmt.Println(pags)
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
