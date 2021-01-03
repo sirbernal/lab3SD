@@ -314,6 +314,9 @@ func RealMerge(){
 }
 func CleanLocalMerge(){
 	registro= [][]string{}
+	for _,_= range dominios{
+		registro=append(registro,[]string{})
+	}
 	for _,domain:= range dominios{
 		os.Remove("RegistroZF"+domain+".txt")
 		os.Remove("LOG"+domain+".txt")

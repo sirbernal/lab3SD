@@ -62,11 +62,18 @@ func giveDNS(){//funcion que designa el dns cada vez que se agregue un admin
 		upRandomizer()
 	}
 }
+func giveDNSReset(idn int){//funcion que designa el dns cada vez que se agregue un admin
+	designio:= idn%3 //verifica que designio al azar le corresponde
+	 //guarda la direccion que requiere el admin
+	idadm[idn]=int64(randomizer[designio]) //se guarda una lista opcional que registra donde se conectará cada admin
+	if designio==2{//si es el ultimo de los 3 admins por grupo se reinicia el arreglo que designa al azar
+		upRandomizer()
+	}
+}
 func resetDNS(){
 	upRandomizer()
-	idadm=[]int64{}
-	for i:=0; i<=int(id);i++{
-		giveDNS()
+	for i:=0; i<int(id);i++{
+		giveDNSReset(i)
 	}
 }
 func sendDNSRoute(admin int64)string{

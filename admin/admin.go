@@ -175,6 +175,8 @@ func main() {
 
 
 		// Segundo, se envia los comandos al dns designado x broker
+		fmt.Println(new_comandos[0])
+		fmt.Println(new_comandos[1])
 		CommandtoDNS(new_comandos,ipDNS)
 		comandos = []string{}
 		/*

@@ -188,6 +188,9 @@ func FinalClean(){
 	clocks= [][]int64{}
 	CleanLocalMerge()
 	UpdateFiles()
+	for _,_= range dominios{
+		registro=append(registro,[]string{})
+	}
 }
 func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {
 	return &pb3.GetClockResponse{Clock: []int64{}}  , nil
