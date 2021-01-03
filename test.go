@@ -10,6 +10,7 @@ import (
 var idadm []int64
 var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
 var randomizer []int
+var id int64
 
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
@@ -30,18 +31,28 @@ func upRandomizer(){ //actualiza la designacion al azar para los tres admins que
 	rand.Seed(time.Now().UnixNano())//genera una semilla random basada en el time de la maquina
 	randomizer=rand.Perm(3)//genera una permutacion al azar de 0 a 2
 }
-func giveDNS(admin int64)string{//funcion que designa el dns que le corresponde al admin
-	designio:= admin%3 //verifica que designio al azar le corresponde
-	dnsadm:=dns[randomizer[designio]] //guarda la direccion que requiere el admin
+func giveDNS(){//funcion que designa el dns cada vez que se agregue un admin
+	designio:= id%3 //verifica que designio al azar le corresponde
+	 //guarda la direccion que requiere el admin
 	idadm=append(idadm,int64(randomizer[designio])) //se guarda una lista opcional que registra donde se conectará cada admin
 	if designio==2{//si es el ultimo de los 3 admins por grupo se reinicia el arreglo que designa al azar
 		upRandomizer()
 	}
-	return dnsadm//retorna la direccion al admin
+}
+
+func resetDNS(){
+	upRandomizer()
+	idadm=[]int64{}
+	for i:=0; i<int(id);i++{
+		giveDNS()
+	}
 }
 
 func main() {
 	a:=[]int{0,0,0}
 	a[2]++
 	fmt.Println(a)
+	id = 3
+	resetDNS()
+	fmt.Println(idadm)
 }

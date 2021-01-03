@@ -29,9 +29,18 @@ message ReceiveChangesResponse {
     string status = 1;
 }
 
+message NotifyBrokerRequest {
+    string notify = 1;
+}
+
+message NotifyBrokerResponse {
+    string resp = 1;
+}
+
 
 service DNSService {
     rpc GetClock (GetClockRequest) returns (GetClockResponse) {}
     rpc SendChanges (SendChangesRequest)  returns (SendChangesResponse) {}
     rpc ReceiveChanges(ReceiveChangesRequest) returns (ReceiveChangesResponse) {}
+    rpc NotifyBroker(NotifyBrokerRequest) returns (NotifyBrokerResponse) {}
 }

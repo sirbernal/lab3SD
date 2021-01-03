@@ -29,6 +29,7 @@ var timeout = time.Duration(1)*time.Second
 var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
 var mergedns [][]string  // se guardan los dominios de los dns para hacer los merges
 var mergereg [][][]string
+var brokerip = "localhost:50051"
 func DetectCommand(comm string)[]string{
 	str:= strings.Split(comm, " ")
 	var resp []string
@@ -135,7 +136,7 @@ func UpdateFiles(){
 	}
 }
 func Merge(){
-	time.Sleep(time.Duration(15)*time.Second)
+	time.Sleep(time.Duration(60)*time.Second)
 	// Avisar a los demas dns que se hara un merge, por lo que ellos enviaran los dominios que ellos posean en registro
 	for i,dire:= range dns{
 		
@@ -246,7 +247,27 @@ func Merge(){
 			}
 		}
 	}
+	// Notificamos a Broker que se hizo un merge, para que pueda designar nuevamente ip's nuevas a cada admin
+	// Ya que como todos los dns tendran las mismos archivos, no necesariamente para mantener el Read your Writes debe
+	// solamente un admin quedarse fijo por siempre a un DNS
+	conn, err := grpc.Dial(brokerip, grpc.WithInsecure()) //genera la conexion con el broker
+			if err != nil {
+				fmt.Println("Problemas al hacer conexion")
+			}
+			defer conn.Close()
+	
+			client := pb3.NewDNSServiceClient(conn)
+	
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			defer cancel()
+
+			msg:= &pb3.NotifyBrokerRequest{Notify: "Merge realizado"} 
+			_, err = client.NotifyBroker(ctx, msg)
+			if err != nil {
+				fmt.Println("Error, broker no esta conectado ")
 }
+}
+
 func TranslateClock (clk []int64)[]string{
 	a:=[]string{}
 	for _,j:= range clk{
@@ -372,19 +393,24 @@ func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequ
 	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
 	
 }
+func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest) (*pb3.NotifyBrokerResponse, error) {
+	
+	return &pb3.NotifyBrokerResponse{Resp: "Done!"}  , nil
+	
+}
 
 
 func main() {
-	ReceiveOp([]string{"append","google.cl aquiIP"},0)
-	ReceiveOp([]string{"append","google.com Ipqlia"},0)
-	ReceiveOp([]string{"append","asd.cl asdhj"},0)
-	ReceiveOp([]string{"append","lel.zz sadkjasdh"},0)
-	ReceiveOp([]string{"delete","google.cl"},0)
-	ReceiveOp([]string{"update","google.com nueva Ip"},0)
-	ReceiveOp([]string{"append","lul.zz ñaña"},0)
-	ReceiveOp([]string{"update","lel.zz holi"},0)
-	ReceiveOp([]string{"update","lel.zz asd"},0)
-	Merge()
+	//ReceiveOp([]string{"append","google.cl aquiIP"},0)
+	//ReceiveOp([]string{"append","google.com Ipqlia"},0)
+	//ReceiveOp([]string{"append","asd.cl asdhj"},0)
+	//ReceiveOp([]string{"append","lel.zz sadkjasdh"},0)
+	//ReceiveOp([]string{"delete","google.cl"},0)
+	//ReceiveOp([]string{"update","google.com nueva Ip"},0)
+	//ReceiveOp([]string{"append","lul.zz ñaña"},0)
+	//ReceiveOp([]string{"update","lel.zz holi"},0)
+	//ReceiveOp([]string{"update","lel.zz asd"},0)
+	go Merge()
 
 	fmt.Println(registro)
 	fmt.Println(dominios)

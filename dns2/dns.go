@@ -245,18 +245,26 @@ func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequ
 	}
 	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
 }
+
+func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest) (*pb3.NotifyBrokerResponse, error) {
+	
+	return &pb3.NotifyBrokerResponse{Resp: "Done!"}  , nil
+	
+}
+
+
 func main() {
-	ReceiveOp([]string{"append","google.cl aquiIP"})
-	ReceiveOp([]string{"append","google.es Ipqlia"})
-	ReceiveOp([]string{"append","asd.ag asdhj"})
-	ReceiveOp([]string{"append","lel.za sadkjasdh"})
-	ReceiveOp([]string{"delete","google.cl"})
-	ReceiveOp([]string{"update","google.es nueva Ip"})
-	ReceiveOp([]string{"append","lul.za ñaña"})
-	ReceiveOp([]string{"update","lel.za holi"})
-	ReceiveOp([]string{"update","lel.za asdasdsdaqsda"})
-	ReceiveOp([]string{"append","lel.xd random extra"})
-	ReceiveOp([]string{"append","dns2.cl asdasdP"})
+	// ReceiveOp([]string{"append","google.cl aquiIP"})
+	// ReceiveOp([]string{"append","google.es Ipqlia"})
+	// ReceiveOp([]string{"append","asd.ag asdhj"})
+	// ReceiveOp([]string{"append","lel.za sadkjasdh"})
+	// ReceiveOp([]string{"delete","google.cl"})
+	// ReceiveOp([]string{"update","google.es nueva Ip"})
+	// ReceiveOp([]string{"append","lul.za ñaña"})
+	// ReceiveOp([]string{"update","lel.za holi"})
+	// ReceiveOp([]string{"update","lel.za asdasdsdaqsda"})
+	// ReceiveOp([]string{"append","lel.xd random extra"})
+	// ReceiveOp([]string{"append","dns2.cl asdasdP"})
 	fmt.Println(dominios)
 	fmt.Println(clocks)
 	fmt.Println(pags)

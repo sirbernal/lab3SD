@@ -245,17 +245,25 @@ func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequ
 	}
 	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
 }
+
+func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest) (*pb3.NotifyBrokerResponse, error) {
+	
+	return &pb3.NotifyBrokerResponse{Resp: "Done!"}  , nil
+	
+}
+
+
 func main() {
-	ReceiveOp([]string{"append","google.cl aquiIP"})
-	ReceiveOp([]string{"append","google.com Ipqlia"})
-	ReceiveOp([]string{"append","asd.cs asdhj"})
-	ReceiveOp([]string{"append","lel.za sadkjasdh"})
-	ReceiveOp([]string{"delete","google.cl"})
-	ReceiveOp([]string{"update","google.com ñañaña"})
-	ReceiveOp([]string{"append","lul.za ñaña"})
-	ReceiveOp([]string{"update","lel.za holi"})
-	ReceiveOp([]string{"update","lel.za asd"})
-	ReceiveOp([]string{"append","dns1.cl asdasdP"})
+	// ReceiveOp([]string{"append","google.cl aquiIP"})
+	// ReceiveOp([]string{"append","google.com Ipqlia"})
+	// ReceiveOp([]string{"append","asd.cs asdhj"})
+	// ReceiveOp([]string{"append","lel.za sadkjasdh"})
+	// ReceiveOp([]string{"delete","google.cl"})
+	// ReceiveOp([]string{"update","google.com ñañaña"})
+	// ReceiveOp([]string{"append","lul.za ñaña"})
+	// ReceiveOp([]string{"update","lel.za holi"})
+	// ReceiveOp([]string{"update","lel.za asd"})
+	// ReceiveOp([]string{"append","dns1.cl asdasdP"})
 	fmt.Println(dominios)
 	fmt.Println(clocks)
 	fmt.Println(pags)

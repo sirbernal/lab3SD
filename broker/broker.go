@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	pb "github.com/sirbernal/lab3SD/proto/client_service"
 	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
-	//pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
+	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
 	"google.golang.org/grpc"
 )
 var timeout = time.Duration(1)*time.Second
@@ -102,6 +102,30 @@ func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAd
 
 }
 
+func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest) (*pb3.NotifyBrokerResponse, error) {
+	resetDNS()
+	fmt.Println("Merge realizado: ", idadm)
+	return &pb3.NotifyBrokerResponse{Resp: "Done!"}  , nil
+	
+}
+
+
+////////////////// FUNCIONES DECLARADAS EN BROKER SOLO PARA QUE FUNCIONE EL PROGRAMA, ACA NO HACEN NADA///////////////////////////
+func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) { //////
+																															//////
+	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil																//////
+																															//////
+}																															//////
+
+func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {			//////
+
+	return &pb3.SendChangesResponse{Dominios: []string{}}  , nil
+}
+
+func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {					//////
+	return &pb3.GetClockResponse{Clock: []int64{}}  , nil																	//////
+}																															//////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func main() {
 	upRandomizer()
@@ -115,6 +139,7 @@ func main() {
 
 	pb.RegisterClientServiceServer(s, &server{})
 	pb2.RegisterAdminServiceServer(s, &server{})
+	pb3.RegisterDNSServiceServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
