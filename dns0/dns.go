@@ -117,6 +117,23 @@ func ActReg(pos int){
 	}
 	file2.Close()
 }
+func UpdateFiles(){
+	for i,_:=range dominios{
+		file,err:= os.OpenFile("RegistroZF"+dominios[i]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
+		defer file.Close()
+		if err !=nil{
+			os.Exit(1)
+		}
+		for _,j:= range pags[i]{
+			word:= j[0]+" IN A "+j[1]
+			_, err := file.WriteString(word + "\n")
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		file.Close()
+	}
+}
 func Merge(){
 	time.Sleep(time.Duration(15)*time.Second)
 	// Avisar a los demas dns que se hara un merge, por lo que ellos enviaran los dominios que ellos posean en registro
@@ -172,11 +189,71 @@ func Merge(){
 	RealMerge()
 	mergedns=[][]string{}
 	mergereg=[][][]string{}
-	fmt.Println(clocks)
-	fmt.Println(pags)
-
+	CleanLocalMerge()
+	for pag,i:=range pags{
+		for index,j:= range i{
+			for k,dire:=range dns{
+				if k == idDNS{
+					continue
+				}
+		
+				conn, err := grpc.Dial(dire, grpc.WithInsecure()) //genera la conexion con el broker
+				if err != nil {
+					fmt.Println("Problemas al hacer conexion")
+				}
+				defer conn.Close()
+		
+				client := pb3.NewDNSServiceClient(conn)
+		
+				ctx, cancel := context.WithTimeout(context.Background(), timeout)
+				defer cancel()
+				tipo:=int64(1)
+				if pag== 0 && index == 0{
+					tipo=0
+				}
+				if pag==len(pags)-1 && index==len(i)-1{
+					tipo=2
+				}
+				msg:= &pb3.ReceiveChangesRequest{Operations: []string{"append",j[0]+" "+j[1]}, Type: tipo} 
+				_, err = client.ReceiveChanges(ctx, msg)
+				if err != nil {
+					fmt.Println("Error, no esta el server conectado ")
+				}
+			}
+		}
+	}
+	for _,i:=range clocks{
+		for k,dire:=range dns{
+			if k == idDNS{
+				continue
+			}
 	
-
+			conn, err := grpc.Dial(dire, grpc.WithInsecure()) //genera la conexion con el broker
+			if err != nil {
+				fmt.Println("Problemas al hacer conexion")
+			}
+			defer conn.Close()
+	
+			client := pb3.NewDNSServiceClient(conn)
+	
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			defer cancel()
+			tipo:=int64(3)
+			msg:= &pb3.ReceiveChangesRequest{Operations: TranslateClock(i), Type: tipo} 
+			_, err = client.ReceiveChanges(ctx, msg)
+			if err != nil {
+				fmt.Println("Error, no esta el server conectado ")
+			}
+		}
+	}
+}
+func TranslateClock (clk []int64)[]string{
+	a:=[]string{}
+	for _,j:= range clk{
+		b:=strconv.FormatInt(j,10)
+		a=append(a,b)
+	}
+	return a
 }
 func RealMerge(){
 	set0:= make(map[string]bool)//arreglo que guarda direcciones reservadas por prioridad del dns0
@@ -214,7 +291,14 @@ func RealMerge(){
 		}
 	}
 }
-
+func CleanLocalMerge(){
+	registro= [][]string{}
+	for _,domain:= range dominios{
+		os.Remove("RegistroZF"+domain+".txt")
+		os.Remove("LOG"+domain+".txt")
+	}
+	UpdateFiles()
+}
 func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
 	domain:=DetectDomain(op[1])
 	values:=DivideData(op[1])
@@ -291,7 +375,7 @@ func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequ
 
 
 func main() {
-	/*ReceiveOp([]string{"append","google.cl aquiIP"},0)
+	ReceiveOp([]string{"append","google.cl aquiIP"},0)
 	ReceiveOp([]string{"append","google.com Ipqlia"},0)
 	ReceiveOp([]string{"append","asd.cl asdhj"},0)
 	ReceiveOp([]string{"append","lel.zz sadkjasdh"},0)
@@ -299,7 +383,7 @@ func main() {
 	ReceiveOp([]string{"update","google.com nueva Ip"},0)
 	ReceiveOp([]string{"append","lul.zz ñaña"},0)
 	ReceiveOp([]string{"update","lel.zz holi"},0)
-	ReceiveOp([]string{"update","lel.zz asd"},0)*/
+	ReceiveOp([]string{"update","lel.zz asd"},0)
 	Merge()
 
 	fmt.Println(registro)

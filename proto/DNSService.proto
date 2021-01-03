@@ -22,6 +22,7 @@ message SendChangesResponse {
 
 message ReceiveChangesRequest {
     repeated string operations = 1;
+    int64 type = 2; //0: borrado inicial (mandado con la primera direccion) 1: recepción de sitios 2: recepcion ultimo sitio (borrado final) 3: recepcion de dominios
 }
 
 message ReceiveChangesResponse {

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	//"time"
+	"time"
 	"strings"
 //	"bufio"
 	"os"
@@ -154,6 +154,41 @@ func ReceiveOp(op []string)(){ //operacion,valores
 	fmt.Println(clocks)
 	ActReg(pos)
 }
+func UpdateFiles(){
+	for i,_:=range dominios{
+		file,err:= os.OpenFile("RegistroZF"+dominios[i]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
+		defer file.Close()
+		if err !=nil{
+			os.Exit(1)
+		}
+		for _,j:= range pags[i]{
+			word:= j[0]+" IN A "+j[1]
+			_, err := file.WriteString(word + "\n")
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		file.Close()
+	}
+}
+func CleanLocalMerge(){
+	for _,domain:= range dominios{
+		os.Remove("RegistroZF"+domain+".txt")
+		os.Remove("LOG"+domain+".txt")
+	}
+}
+func InitialClean(){
+	CleanLocalMerge()
+	dominios= []string{}
+	pags= [][][]string{}
+	 //[[[algo.com,direccion],[xd.com, direccion]],[lel.cl],[]]
+}
+func FinalClean(){
+	registro= [][]string{}
+	clocks= [][]int64{}
+	CleanLocalMerge()
+	UpdateFiles()
+}
 func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {
 	return &pb3.GetClockResponse{Clock: []int64{}}  , nil
 }
@@ -184,14 +219,34 @@ func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (
 	}
 	
 }
+func TranslateClock (clk []string)[]int64{
+	a:=[]int64{}
+	for _,j:= range clk{
+		b,_:=strconv.ParseInt(j,10,64)
+		a=append(a,b)
+	}
+	return a
+}
 
 func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) {
-	
+	if msg.GetType()==0{
+		InitialClean()
+		ReceiveOp(msg.GetOperations())
+	}
+	if msg.GetType()==1{
+		ReceiveOp(msg.GetOperations())
+	}
+	if msg.GetType()==2{
+		ReceiveOp(msg.GetOperations())
+		FinalClean()
+	}
+	if msg.GetType()==3{
+		clocks=append(clocks,TranslateClock(msg.GetOperations()))
+	}
 	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil
-	
 }
 func main() {
-	/*ReceiveOp([]string{"append","google.cl aquiIP"})
+	ReceiveOp([]string{"append","google.cl aquiIP"})
 	ReceiveOp([]string{"append","google.com Ipqlia"})
 	ReceiveOp([]string{"append","asd.cs asdhj"})
 	ReceiveOp([]string{"append","lel.za sadkjasdh"})
@@ -203,7 +258,13 @@ func main() {
 	ReceiveOp([]string{"append","dns1.cl asdasdP"})
 	fmt.Println(dominios)
 	fmt.Println(clocks)
-	fmt.Println(pags)*/
+	fmt.Println(pags)
+	go func(){
+		time.Sleep(time.Duration(25)*time.Second)
+		fmt.Println(dominios)
+		fmt.Println(clocks)
+		fmt.Println(pags)
+	}()
 	lis, err := net.Listen("tcp", ":50053")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
