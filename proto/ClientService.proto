@@ -15,5 +15,4 @@ message GetIPResponse {
 
 service ClientService {
     rpc GetIP (GetIPRequest) returns (GetIPResponse) {}
-   
 }

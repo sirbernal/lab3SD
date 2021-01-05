@@ -17,12 +17,36 @@ var id = int64(0)
 var idadm []int64
 var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
 var randomizer []int
+var randoclient []int
 type server struct {
 }
 
 func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResponse, error) {
-	fmt.Println(msg.GetDireccion())
-	return &pb.GetIPResponse{Ip: "192.168.0.1",Clock: []int64{} }, nil
+	upRandomizerClient()
+	for _,dire:=range randoclient{
+		conn, err := grpc.Dial(dns[dire], grpc.WithInsecure()) //genera la conexion con el broker
+		if err != nil {
+			fmt.Println("Problemas al hacer conexion")
+			continue
+		}
+		defer conn.Close()
+		client := pb3.NewDNSServiceClient(conn)
+
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+
+		msg:= &pb3.GetIPBrokerRequest{Direccion: msg.GetDireccion()} 
+		resp, err := client.GetIPBroker(ctx, msg)
+		if err != nil {
+			fmt.Println("Error, dns no esta conectado ")
+			continue
+		}
+		if resp.GetClock()[0]==-1{
+			continue
+		}
+		return &pb.GetIPResponse{Ip: resp.GetIp() ,Clock: resp.GetClock() }, nil
+	}
+	return &pb.GetIPResponse{Clock: []int64{-1},Ip: ""}, nil
 }
 
 func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) {
@@ -53,6 +77,11 @@ func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*p
 func upRandomizer(){ //actualiza la designacion al azar para los tres admins que se incorporen
 	rand.Seed(time.Now().UnixNano())//genera una semilla random basada en el time de la maquina
 	randomizer=rand.Perm(3)//genera una permutacion al azar de 0 a 2
+}
+
+func upRandomizerClient(){ //actualiza la designacion al azar para los tres admins que se incorporen
+	rand.Seed(time.Now().UnixNano())//genera una semilla random basada en el time de la maquina
+	randoclient=rand.Perm(3)//genera una permutacion al azar de 0 a 2
 }
 func giveDNS(){//funcion que designa el dns cada vez que se agregue un admin
 	designio:= id%3 //verifica que designio al azar le corresponde
@@ -127,6 +156,9 @@ func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequ
 func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {			//////
 
 	return &pb3.SendChangesResponse{Dominios: []string{}}  , nil
+}
+func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {
+	return &pb3.GetIPBrokerResponse{Clock: []int64{},Ip: ""}  , nil
 }
 
 func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {					//////

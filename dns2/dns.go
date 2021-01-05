@@ -192,8 +192,15 @@ func FinalClean(){
 		registro=append(registro,[]string{})
 	}
 }
-func (s *server) GetClock(ctx context.Context, msg *pb3.GetClockRequest) (*pb3.GetClockResponse, error) {
-	return &pb3.GetClockResponse{Clock: []int64{}}  , nil
+func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {
+	pag:=msg.GetDireccion()
+	pos:=SearchDomain(DetectDomain(pag)) //por si no encuentra la pag
+	for _,j:=range pags[pos]{
+		if j[0]==pag{
+			return &pb3.GetIPBrokerResponse{Clock: clocks[pos],Ip: j[1]}  , nil
+		}
+	}
+	return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip: ""}  , nil
 }
 
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {

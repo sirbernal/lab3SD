@@ -37,10 +37,18 @@ message NotifyBrokerResponse {
     string resp = 1;
 }
 
+message GetIPBrokerRequest {
+    string direccion = 1;  
+}
+
+message GetIPBrokerResponse {
+    string ip = 1;
+    repeated int64 clock = 2;
+}
 
 service DNSService {
-    rpc GetClock (GetClockRequest) returns (GetClockResponse) {}
     rpc SendChanges (SendChangesRequest)  returns (SendChangesResponse) {}
     rpc ReceiveChanges(ReceiveChangesRequest) returns (ReceiveChangesResponse) {}
     rpc NotifyBroker(NotifyBrokerRequest) returns (NotifyBrokerResponse) {}
+    rpc GetIPBroker (GetIPBrokerRequest) returns (GetIPBrokerResponse) {}
 }
