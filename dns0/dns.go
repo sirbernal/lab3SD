@@ -68,7 +68,6 @@ func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o camb
 	}
 }
 func ActReg(pos int){
-	fmt.Println("Actualizando Registro ZF dominio: "+dominios[pos])
 	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
 	defer file.Close()
 	if err !=nil{
@@ -124,7 +123,8 @@ func Merge(){
 
 		conn, err := grpc.Dial(dire, grpc.WithInsecure()) //genera la conexion con el broker
 		if err != nil {
-			fmt.Println("Problemas al hacer conexion")
+			fmt.Println("Merge Error...Problemas al hacer conexion con dns "+strconv.Itoa(i)+"Omitiendo Merge para nodo offline")
+			continue
 		}
 		defer conn.Close()
 
@@ -136,7 +136,8 @@ func Merge(){
 
 		resp, err := client.SendChanges(ctx, msg)
 		if err != nil {
-			fmt.Println("Error, no esta el server conectado ")
+			fmt.Println("Merge Error...Problemas al hacer conexion con dns "+strconv.Itoa(i)+"Omitiendo Merge para nodo offline")
+			continue
 		}
 
 		mergedns = append(mergedns, resp.GetDominios())
@@ -150,7 +151,7 @@ func Merge(){
 			}
 			conn, err := grpc.Dial(dns[i], grpc.WithInsecure()) //genera la conexion con el broker
 			if err != nil {
-				fmt.Println("Problemas al hacer conexion")
+				continue
 			}
 			defer conn.Close()
 			client := pb3.NewDNSServiceClient(conn)
@@ -159,7 +160,7 @@ func Merge(){
 			msg:= &pb3.SendChangesRequest{Soli: strconv.Itoa(j)} 
 			resp, err := client.SendChanges(ctx, msg)
 			if err != nil {
-				fmt.Println("Error, no esta el server conectado ")
+				continue
 			}
 			mergereg[i]=append(mergereg[i],resp.GetDominios())			
 		}
@@ -174,10 +175,9 @@ func Merge(){
 				if k == idDNS{
 					continue
 				}
-		
-				conn, err := grpc.Dial(dire, grpc.WithInsecure()) //genera la conexion con el broker
+				conn, err := grpc.Dial(dire, grpc.WithInsecure())
 				if err != nil {
-					fmt.Println("Problemas al hacer conexion")
+					continue
 				}
 				defer conn.Close()
 		
@@ -195,7 +195,7 @@ func Merge(){
 				msg:= &pb3.ReceiveChangesRequest{Operations: []string{"append",j[0]+" "+j[1]}, Type: tipo} 
 				_, err = client.ReceiveChanges(ctx, msg)
 				if err != nil {
-					fmt.Println("Error, no esta el server conectado ")
+					continue
 				}
 			}
 		}
@@ -208,7 +208,7 @@ func Merge(){
 	
 			conn, err := grpc.Dial(dire, grpc.WithInsecure()) //genera la conexion con el broker
 			if err != nil {
-				fmt.Println("Problemas al hacer conexion")
+				continue
 			}
 			defer conn.Close()
 	
@@ -220,7 +220,7 @@ func Merge(){
 			msg:= &pb3.ReceiveChangesRequest{Operations: TranslateClock(i), Type: tipo} 
 			_, err = client.ReceiveChanges(ctx, msg)
 			if err != nil {
-				fmt.Println("Error, no esta el server conectado ")
+				continue
 			}
 		}
 	}
@@ -229,7 +229,7 @@ func Merge(){
 	// solamente un admin quedarse fijo por siempre a un DNS
 	conn, err := grpc.Dial(brokerip, grpc.WithInsecure()) //genera la conexion con el broker
 			if err != nil {
-				fmt.Println("Problemas al hacer conexion")
+				fmt.Println("Problemas al hacer conexion con broker para notificar Merge")
 			}
 			defer conn.Close()
 	
@@ -241,7 +241,7 @@ func Merge(){
 			msg:= &pb3.NotifyBrokerRequest{Notify: "Merge realizado"} 
 			_, err = client.NotifyBroker(ctx, msg)
 			if err != nil {
-				fmt.Println("Error, broker no esta conectado ")
+				fmt.Println("Problemas al hacer conexion con broker para notificar Merge")
 }
 }
 
@@ -357,7 +357,6 @@ func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
 	clocks[pos][dnsid]++
-	fmt.Println(clocks)
 	ActReg(pos)
 }
 func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {
@@ -372,11 +371,6 @@ func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (
 }
 
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
-	
-	fmt.Println("llego: ", msg.GetCommand() )
-	fmt.Println( msg.GetCommand()[0] )
-	fmt.Println( msg.GetCommand()[1] )
-	fmt.Println( len(msg.GetCommand()))
 	ReceiveOp(msg.GetCommand(),0)
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
@@ -411,16 +405,12 @@ func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest)
 
 
 func main() {
-	ReceiveOp([]string{"append","google.cl 193.168.1.3"},0)
-	ReceiveOp([]string{"update","google.cl 1.2.3.4"},0)
-	ReceiveOp([]string{"update","google.cl gooogle.cl"},0)
-	ReceiveOp([]string{"update","google.cl 1.2.3.5"},0)
-	ReceiveOp([]string{"delete","google.es"},0)
 	go func(){
 		for{
 			Merge()
 		}
 	}()
+	fmt.Println("DNS 0 en línea")
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)

@@ -61,7 +61,6 @@ func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o camb
 	}
 }
 func ActReg(pos int){
-	fmt.Println("Actualizando Registro ZF dominio: "+dominios[pos])
 	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
 	defer file.Close()
 	if err !=nil{
@@ -147,7 +146,6 @@ func ReceiveOp(op []string)(){ //operacion,valores
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
 	clocks[pos][idDNS]++
-	fmt.Println(clocks)
 	ActReg(pos)
 }
 func UpdateFiles(){
@@ -199,11 +197,6 @@ func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (
 	return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip: ""}  , nil
 }
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
-	
-	fmt.Println("llego: ", msg.GetCommand() )
-	fmt.Println( msg.GetCommand()[0] )
-	fmt.Println( msg.GetCommand()[1] )
-	fmt.Println( len(msg.GetCommand()))
 	ReceiveOp(msg.GetCommand())
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
@@ -259,6 +252,7 @@ func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest)
 
 
 func main() {
+	fmt.Println("DNS 1 en línea")
 	lis, err := net.Listen("tcp", ":50053")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
