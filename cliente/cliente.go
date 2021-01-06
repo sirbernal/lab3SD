@@ -7,34 +7,28 @@ import (
 	"strings"
 	pb "github.com/sirbernal/lab3SD/proto/client_service"
 	"google.golang.org/grpc"
-
+	"bufio"
+	"os"
 )
 
-var timeout = time.Duration(1)*time.Second
-var direcciones [][]string //[[google, ip]...]
-var clocks [][]int64 //[clock de google, ...]
+var timeout = time.Duration(1)*time.Second //variable para timeout en conexiones
+var direcciones [][]string //[[google, ip]...] //guarda las direcciones que han sido solicitadas con su respectiva ip
+var clocks [][]int64 //[clock de google, ...] //guarda los relojes asociados a la página
 
-func DetectCommand(comm string)[]string{
-	str:= strings.Split(comm, " ")
-	var resp []string
-	resp=append(resp,strings.ToLower(str[0]))
-	resp=append(resp,strings.Join(str[1:]," "))
-	return resp
-}
-func VerifMonotonicRead(oldclk []int64,newclk []int64)int{ //0 actualizar pag, 1 llego version vieja, 2 llego la misma version
-	igual:=0
+func VerifMonotonicRead(oldclk []int64,newclk []int64)int{ //funcion que verifica el reloj actual de la página en caso de tener 
+	igual:=0 
 	for i:=0;i<3;i++{
 		if oldclk[i]>newclk[i]{
-			return 1
+			return 1 //1 llego version vieja
 		}
 		if oldclk[i]==newclk[i]{
 			igual++
 		}
 	}
 	if igual==3{
-		return 2
+		return 2 //2 llego la misma version
 	}
-	return 0
+	return 0 //0 actualizar pag
 }
 func SearchMonotonicRead(pag string,dir string,clk []int64){
 	for i,j:= range direcciones{
@@ -61,7 +55,8 @@ func SearchMonotonicRead(pag string,dir string,clk []int64){
 func SolicitarIP(direccion string){
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
-		fmt.Println("Problemas al hacer conexion")
+		fmt.Println("Problemas al hacer conexion con broker, pruebe nuevamente...")
+		return
 	}
 	defer conn.Close()
 
@@ -73,7 +68,8 @@ func SolicitarIP(direccion string){
 
 	resp, err := client.GetIP(ctx, msg)
 	if err != nil {
-		fmt.Println("Error, no esta el server conectado ")
+		fmt.Println("Problemas al hacer conexion con broker, pruebe nuevamente...")
+		return
 	}
 	if resp.GetClock()[0]==-1{
 		fmt.Println("Página no encontrada")
@@ -84,11 +80,13 @@ func SolicitarIP(direccion string){
 
 
 func main() {
-
-	SolicitarIP("google.cl")
-	SolicitarIP("google.cl")
-	SolicitarIP("google.cl")
-	SolicitarIP("google.cl")
-	SolicitarIP("google.cl")
-	SolicitarIP("google.cl")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Hola, puede escribir su opcion: ")
+	for{
+		// Se descompone el string creado para hacer los envios correspondientes
+		text, _ := reader.ReadString('\n')
+		str := strings.Split(text, "\n")
+		SolicitarIP(str[0])
+		fmt.Print("Hola, puede escribir su opcion: ")
+	}
 }

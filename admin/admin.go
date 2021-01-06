@@ -162,57 +162,36 @@ func Broker()string{
 func main() {
 	RegAdmin()
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Hola, puede escribir su opcion")
-	for{
-		// Se descompone el string creado para hacer los envios correspondientes
-		text, _ := reader.ReadString('\n')
-		comandos := DetectCommand(text)
-		str := strings.Split(comandos[1], "\n")
-		new_comandos := []string{comandos[0],str[0]}
-		
-		// primero se solicita la ip del dns al broker 
-		ipDNS:= Broker()
+	fmt.Print("Menú Admin\nIngrese comando deseado: ")
+	Menu: 
+		for{
+			// Se descompone el string creado para hacer los envios correspondientes
+			text, _ := reader.ReadString('\n')
+			comandos := DetectCommand(text)
+			str := strings.Split(comandos[1], "\n")
+			new_comandos := []string{comandos[0],str[0]}
+			switch new_comandos[0]{
+			case "append","update","create":
+				if len(strings.Split(str[0]," "))!=2{
+					fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
+					continue Menu
+				}
+			case "delete":
+				if len(strings.Split(str[0]," "))!=1{
+					fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
+					continue Menu
+				}
+			default:
+				fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
+				continue Menu
+			}
+			// primero se solicita la ip del dns al broker 
+			ipDNS:= Broker()
 
+			// Segundo, se envia los comandos al dns designado x broker
+			CommandtoDNS(new_comandos,ipDNS)
+			comandos = []string{}
+			fmt.Print("\nIngrese comando deseado:")
+		}
 
-		// Segundo, se envia los comandos al dns designado x broker
-		fmt.Println(new_comandos[0])
-		fmt.Println(new_comandos[1])
-		CommandtoDNS(new_comandos,ipDNS)
-		comandos = []string{}
-		/*
-		
-		switch comandos[0]{
-			case "create","append":
-				//fmt.Println("Escribio crear")
-				//str := strings.Split(comandos[1], " ")
-				Broker("create")
-				//Create(str[0], str[1])
-
-			case "update":
-				//fmt.Println("Escribio subida")
-				//str := strings.Split(comandos[1], " ")
-				//option := " "
-
-				/*if strings.Count(str[1], ".") == 3{
-					option = "ip"
-				}else{
-					option = "dire"
-				} */
-
-				//Broker("update")
-				//Update(str[0], str[1], option)
-				
-			//case "delete":
-				//Broker("delete")
-				//fmt.Println("Escribio borrar")
-				//Delete(comandos[1])
-
-
-		
-		comandos = []string{}
-	}
-
-	fmt.Println(DetectCommand("Hola, que sucede mi pana"))
-	fmt.Println("Hola")
-	//SolicitarIP()
 }

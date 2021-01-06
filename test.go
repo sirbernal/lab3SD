@@ -54,20 +54,17 @@ func resetDNS(){
 		giveDNSReset(i)
 	}
 }
+func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o cambio de dominio
+	str:= strings.Split(w, ".")
+	if len(str)==4{ //se asume que la ip vendrá en formato x.x.x.x
+		return false //es cambio de dominio
+	}else{
+		return true //es cambio de ip
+	}
+}
 
 func main() {
-	upRandomizer()
-	id=0
-	giveDNS()
-	id++
-	giveDNS()
-	id++
-	giveDNS()
-	id++
-	giveDNS()
-	id++
-	giveDNS()
-	fmt.Println(idadm)
-	resetDNS()
-	fmt.Println(idadm)
+	fmt.Println(DetectUpdate("asdsd"))
+	fmt.Println(DetectUpdate("1.1.1.1"))
+	fmt.Println(DetectUpdate("sad.c"))
 }

@@ -59,37 +59,14 @@ func RemoveIndex(s [][]string, index int) [][]string { //función editada y saca
 	return append(s[:index], s[index+1:]...)
 }
 
-
-
-/*func Exists(name string) bool { //función sacada de https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
-    if _, err := os.Stat(name); err != nil {
-        if os.IsNotExist(err) {
-            return false
-        }
-    }
-    return true
-}*/
-/*func InitReg(){
-	if !Exists("./RegistroZF.txt"){
-		fmt.Println("Archivo: 'RegistroZF' no detectado... generando nuevo Registro")
-		ActReg()
+func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o cambio de dominio
+	str:= strings.Split(w, ".")
+	if len(str)==4{ //se asume que la ip vendrá en formato x.x.x.x
+		return false //es cambio de dominio
 	}else{
-		fmt.Println("Archivo: 'RegistroZF' detectado... actualizando memoria")
-		file, err := os.Open("./RegistroZF.txt")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		} 
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		scanner.Split(bufio.ScanLines)
-		for scanner.Scan() {
-			line:=DetectCommand(scanner.Text())
-			regmem = append(regmem, []string{line[0],line[1]})
-		}
-		file.Close()
+		return true //es cambio de ip
 	}
-}*/
+}
 func ActReg(pos int){
 	fmt.Println("Actualizando Registro ZF dominio: "+dominios[pos])
 	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
@@ -338,21 +315,44 @@ func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
 		}
 		pags[pos]=append(pags[pos],values)
 	case "update":
+		if pos==-1{
+			fmt.Println("Dominio y pagina inexistente, actualización no válida")
+			return
+		}
+		flag:=false
 		for i,j :=range pags[pos]{
 			if j[0]==values[0]{
-				pags[pos][i]=values
-				fmt.Println(pags[pos][i][1])
+				if DetectUpdate(values[1]){
+					pags[pos][i]=[]string{values[1],j[1]}
+				}else{
+					pags[pos][i]=values
+				}
 				os.Remove("RegistroZF"+domain+".txt")
+				flag=true
 				break
 			}
 		}
+		if !flag{
+			fmt.Println("Pagina a actualizar no existe")
+			return
+		}
 	case "delete":
+		flag:=false
+		if pos==-1{
+			fmt.Println("Dominio y pagina inexistente, eliminación no válida")
+			return
+		}
 		for i,j :=range pags[pos]{
 			if j[0]==values[0]{
 				pags[pos]=RemoveIndex(pags[pos],i)
 				os.Remove("RegistroZF"+domain+".txt")
+				flag=true
 				break
 			}
+		}
+		if !flag{
+			fmt.Println("Pagina a eliminar no existe")
+			return
 		}
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
@@ -411,25 +411,21 @@ func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest)
 
 
 func main() {
-	//ReceiveOp([]string{"append","google.cl aquiIP"},0)
-	//ReceiveOp([]string{"append","google.com Ipqlia"},0)
-	//ReceiveOp([]string{"append","asd.cl asdhj"},0)
-	//ReceiveOp([]string{"append","lel.zz sadkjasdh"},0)
-	//ReceiveOp([]string{"delete","google.cl"},0)
-	//ReceiveOp([]string{"update","google.com nueva Ip"},0)
-	//ReceiveOp([]string{"append","lul.zz ñaña"},0)
-	//ReceiveOp([]string{"update","lel.zz holi"},0)
-	//ReceiveOp([]string{"update","lel.zz asd"},0)
-	go Merge()
-
-	fmt.Println(registro)
-	fmt.Println(dominios)
-	fmt.Println(clocks)
-	fmt.Println(pags)
+	ReceiveOp([]string{"append","google.cl 193.168.1.3"},0)
+	ReceiveOp([]string{"update","google.cl 1.2.3.4"},0)
+	ReceiveOp([]string{"update","google.cl gooogle.cl"},0)
+	ReceiveOp([]string{"update","google.cl 1.2.3.5"},0)
+	ReceiveOp([]string{"delete","google.es"},0)
+	go func(){
+		for{
+			Merge()
+		}
+	}()
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
 	}
+	
 	s := grpc.NewServer()
 
 	pb3.RegisterDNSServiceServer(s, &server{})
@@ -437,4 +433,5 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+	
 }

@@ -3,14 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 	"strings"
-//	"bufio"
 	"os"
 	"log"
 	"net"
 	"strconv"
-
 	//pb "github.com/sirbernal/lab3SD/proto/client_service"
 	pb2 "github.com/sirbernal/lab3SD/proto/admin_service"
 	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
@@ -55,38 +52,14 @@ func SearchDomain(dom string)int{
 func RemoveIndex(s [][]string, index int) [][]string { //función editada y sacada de https://www.golangprograms.com/how-to-delete-an-element-from-a-slice-in-golang.html
 	return append(s[:index], s[index+1:]...)
 }
-
-
-
-/*func Exists(name string) bool { //función sacada de https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
-    if _, err := os.Stat(name); err != nil {
-        if os.IsNotExist(err) {
-            return false
-        }
-    }
-    return true
-}*/
-/*func InitReg(){
-	if !Exists("./RegistroZF.txt"){
-		fmt.Println("Archivo: 'RegistroZF' no detectado... generando nuevo Registro")
-		ActReg()
+func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o cambio de dominio
+	str:= strings.Split(w, ".")
+	if len(str)==4{ //se asume que la ip vendrá en formato x.x.x.x
+		return false //es cambio de dominio
 	}else{
-		fmt.Println("Archivo: 'RegistroZF' detectado... actualizando memoria")
-		file, err := os.Open("./RegistroZF.txt")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		} 
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		scanner.Split(bufio.ScanLines)
-		for scanner.Scan() {
-			line:=DetectCommand(scanner.Text())
-			regmem = append(regmem, []string{line[0],line[1]})
-		}
-		file.Close()
+		return true //es cambio de ip
 	}
-}*/
+}
 func ActReg(pos int){
 	fmt.Println("Actualizando Registro ZF dominio: "+dominios[pos])
 	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
@@ -132,21 +105,44 @@ func ReceiveOp(op []string)(){ //operacion,valores
 		}
 		pags[pos]=append(pags[pos],values)
 	case "update":
+		if pos==-1{
+			fmt.Println("Dominio y pagina inexistente, actualización no válida")
+			return
+		}
+		flag:=false
 		for i,j :=range pags[pos]{
 			if j[0]==values[0]{
-				pags[pos][i]=values
-				fmt.Println(pags[pos][i][1])
+				if DetectUpdate(values[1]){
+					pags[pos][i]=[]string{values[1],j[1]}
+				}else{
+					pags[pos][i]=values
+				}
 				os.Remove("RegistroZF"+domain+".txt")
+				flag=true
 				break
 			}
 		}
+		if !flag{
+			fmt.Println("Pagina a actualizar no existe")
+			return
+		}
 	case "delete":
+		flag:=false
+		if pos==-1{
+			fmt.Println("Dominio y pagina inexistente, eliminación no válida")
+			return
+		}
 		for i,j :=range pags[pos]{
 			if j[0]==values[0]{
 				pags[pos]=RemoveIndex(pags[pos],i)
 				os.Remove("RegistroZF"+domain+".txt")
+				flag=true
 				break
 			}
+		}
+		if !flag{
+			fmt.Println("Pagina a eliminar no existe")
+			return
 		}
 	}
 	registro[pos]=append(registro[pos],op[0]+" "+op[1])
@@ -263,25 +259,6 @@ func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest)
 
 
 func main() {
-	// ReceiveOp([]string{"append","google.cl aquiIP"})
-	// ReceiveOp([]string{"append","google.com Ipqlia"})
-	// ReceiveOp([]string{"append","asd.cs asdhj"})
-	// ReceiveOp([]string{"append","lel.za sadkjasdh"})
-	// ReceiveOp([]string{"delete","google.cl"})
-	// ReceiveOp([]string{"update","google.com ñañaña"})
-	// ReceiveOp([]string{"append","lul.za ñaña"})
-	// ReceiveOp([]string{"update","lel.za holi"})
-	// ReceiveOp([]string{"update","lel.za asd"})
-	// ReceiveOp([]string{"append","dns1.cl asdasdP"})
-	fmt.Println(dominios)
-	fmt.Println(clocks)
-	fmt.Println(pags)
-	go func(){
-		time.Sleep(time.Duration(25)*time.Second)
-		fmt.Println(dominios)
-		fmt.Println(clocks)
-		fmt.Println(pags)
-	}()
 	lis, err := net.Listen("tcp", ":50053")
 	if err != nil {
 		log.Fatal("Error conectando: %v", err)
