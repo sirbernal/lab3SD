@@ -11,13 +11,13 @@ import (
 	"os"
 )
 
-var dires = []string{"localhost:50051"}
+var dires = []string{"10.10.28.81t:50051"} // direccion del broker
 
-var timeout = time.Duration(1)*time.Second
+var timeout = time.Duration(1)*time.Second // timeout para los envios
 
-var id_admin int64
+var id_admin int64 // Id de admin que se asignara una vez iniciado
 
-func DetectCommand(comm string)[]string{
+func DetectCommand(comm string)[]string{ // Funcion que sirve para detectar especificamente si se hace un append, update o delete
 	str:= strings.Split(comm, " ")
 	var resp []string
 	resp=append(resp,strings.ToLower(str[0]))
@@ -25,77 +25,8 @@ func DetectCommand(comm string)[]string{
 	return resp
 }
 
-func DetectCommand2(comm string)[]string{
-	str:= strings.Fields(comm)
-	fmt.Println(str[1])
-	return str
-}
-/*
-func Create(url string, ip string){
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
-	if err != nil {
-		fmt.Println("Problemas al hacer conexion")
-	}
-	defer conn.Close()
 
-	client := pb.NewAdminServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	msg:= &pb.AppendRequest{Url: url, Ip: ip } //envia la consulta por medio de la palabra "status"
-
-	resp, err := client.Append(ctx, msg)
-	if err != nil {
-		fmt.Println("Error, no esta el server conectado ")
-	}
-
-	fmt.Println(resp.GetStatus())
-} */
-/*
-func Update(url string, ip string, option string){
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
-	if err != nil {
-		fmt.Println("Problemas al hacer conexion")
-	}
-	defer conn.Close()
-
-	client := pb.NewAdminServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	msg:= &pb.UpdateRequest{Url: url, Ip: ip, Option: option } //envia la consulta por medio de la palabra "status"
-
-	resp, err := client.Update(ctx, msg)
-	if err != nil {
-		fmt.Println("Error, no esta el server conectado ")
-	}
-
-	fmt.Println(resp.GetStatus())
-} */
-/*
-func Delete(url string){
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
-	if err != nil {
-		fmt.Println("Problemas al hacer conexion")
-	}
-	defer conn.Close()
-
-	client := pb.NewAdminServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	msg:= &pb.DeleteRequest{Url: url} //envia la consulta por medio de la palabra "status"
-
-	resp, err := client.Delete(ctx, msg)
-	if err != nil {
-		fmt.Println("Error, no esta el server conectado ")
-	}
-
-	fmt.Println(resp.GetStatus())
-}
-*/
-
-func RegAdmin(){
+func RegAdmin(){ // funcion que contacta a broker para que este le asigne una id
 	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -113,13 +44,13 @@ func RegAdmin(){
 		fmt.Println("Error, no esta el server conectado ")
 	}
 	fmt.Println(resp.GetId())
-	id_admin = resp.GetId()
+	id_admin = resp.GetId() // se asigna la id recibida
 
 
 }
-
-func CommandtoDNS(action []string,ipdns string){
-	conn, err := grpc.Dial(ipdns, grpc.WithInsecure()) //genera la conexion con el broker
+// Funcion que hace el envio a un dns especifico con alguna accion o comando especifico
+func CommandtoDNS(action []string,ipdns string){ 
+	conn, err := grpc.Dial(ipdns, grpc.WithInsecure()) //genera la conexion con el dns
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
 	}
@@ -138,7 +69,7 @@ func CommandtoDNS(action []string,ipdns string){
 
 }
 
-func Broker()string{
+func Broker()string{ // Con esta funcion se contacta a broker para que este le designe una Ip de un DNS al cual debe conectarse
 	conn, err := grpc.Dial(dires[0], grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion")
@@ -160,18 +91,18 @@ func Broker()string{
 
 }
 func main() {
-	RegAdmin()
-	reader := bufio.NewReader(os.Stdin)
+	RegAdmin() // Nos registramos con broker y obtenemos una id
+	reader := bufio.NewReader(os.Stdin) 
 	fmt.Print("Menú Admin\nIngrese comando deseado: ")
 	Menu: 
 		for{
-			// Se descompone el string creado para hacer los envios correspondientes
+			// Se lee lo que se escribe en pantalla
 			text, _ := reader.ReadString('\n')
-			comandos := DetectCommand(text)
-			str := strings.Split(comandos[1], "\n")
-			new_comandos := []string{comandos[0],str[0]}
-			switch new_comandos[0]{
-			case "append","update","create":
+			comandos := DetectCommand(text) //descomponemos el string que recibimos
+			str := strings.Split(comandos[1], "\n") //quitamos el salto de linea que se nos genera
+			new_comandos := []string{comandos[0],str[0]} // generamos el string final que enviaremos
+			switch new_comandos[0]{           // dependiendo del tipo de comando, recordemos que tienen mas parametros que otros por lo que
+			case "append","update","create":  // es necesario separar en casos especificos
 				if len(strings.Split(str[0]," "))!=2{
 					fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
 					continue Menu
@@ -185,7 +116,7 @@ func main() {
 				fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
 				continue Menu
 			}
-			// primero se solicita la ip del dns al broker 
+			// se solicita la ip del dns al broker 
 			ipDNS:= Broker()
 
 			// Segundo, se envia los comandos al dns designado x broker

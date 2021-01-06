@@ -25,10 +25,10 @@ var registro [][]string //arreglo que mantiene los registros por dominio[[regist
 var pags [][][]string //arreglo que guarda las paginas e ips por dominio[[paginas.cl],[paginas.com],...] =>[paginas.cl]=[["a.cl","1.2.3.4"],["u.cl","2.2.2.2"]]
 var clocks [][]int64  //relojes asociados por dominio [[cl],[com],...] => [cl]=[x,y,z]
 var timeout = time.Duration(1)*time.Second //timeout para conexiones
-var dns = []string{"localhost:50052","localhost:50053","localhost:50054"} //ips de los dns
+var dns = []string{"10.10.28.82:50052","10.10.28.83:50053","10.10.28.84:50054"} //ips de los dns
 var mergedns [][]string  // auxiliar donde guardan los dominios de los dns para hacer los merges
 var mergereg [][][]string //auxiliar donde se guardan los registros de los dns para merge 
-var brokerip = "localhost:50051" //ip del broker
+var brokerip = "10.10.28.81:50051" //ip del broker
 func DetectCommand(comm string)[]string{ //funcion que separa el comando (append... etc) del resto de datos y lo estandariza en minuscula en un arreglo [comando, contenido]
 	str:= strings.Split(comm, " ")
 	var resp []string

@@ -12,19 +12,21 @@ import (
 	pb3 "github.com/sirbernal/lab3SD/proto/dns_service"
 	"google.golang.org/grpc"
 )
-var timeout = time.Duration(1)*time.Second
-var id = int64(0)
-var idadm []int64
-var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
+var timeout = time.Duration(1)*time.Second //definimos el timeout
+var id = int64(0) // variable contador de ids para asignarles a los admins
+var idadm []int64 // se guarda en ip del dns en el index correspondiente al id de algun admin 
+var dns = []string{"10.10.28.82:50052","10.10.28.83:50053","10.10.28.84:50054"} // direcciones de los dns
 var randomizer []int
 var randoclient []int
 type server struct {
 }
-
-func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResponse, error) {
-	upRandomizerClient()
-	for _,dire:=range randoclient{
-		conn, err := grpc.Dial(dns[dire], grpc.WithInsecure()) //genera la conexion con el broker
+// Funcion donde se recibe la solicitud del cliente al broker
+func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResponse, error) { 
+	// Como se buscara la IP del sitio solicitado en cada dns, con la funcion de abajo 
+	// haremos que el orden de conexion de los DNS seran aleatorios
+	upRandomizerClient() 
+	for _,dire:=range randoclient{ // Recorremos el arreglo generado por la funcion de arriba
+		conn, err := grpc.Dial(dns[dire], grpc.WithInsecure()) //genera la conexion con el DNS correspondiente
 		if err != nil {
 			fmt.Println("Problemas al hacer conexion")
 			continue
@@ -35,41 +37,26 @@ func (s *server) GetIP(ctx context.Context, msg *pb.GetIPRequest) (*pb.GetIPResp
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
-		msg:= &pb3.GetIPBrokerRequest{Direccion: msg.GetDireccion()} 
-		resp, err := client.GetIPBroker(ctx, msg)
+		msg:= &pb3.GetIPBrokerRequest{Direccion: msg.GetDireccion()} // Le pasamos al dns la direccion correspondiente
+		resp, err := client.GetIPBroker(ctx, msg) // aqui recibimos la respuesta del DNS
 		if err != nil {
 			fmt.Println("Error, dns no esta conectado ")
 			continue
 		}
-		if resp.GetClock()[0]==-1{
-			continue
+		if resp.GetClock()[0]==-1{ // Este es el caso donde no se encuentra el sitio en el dns correspondiente, 
+			continue               // por lo que continuamos buscando
 		}
-		return &pb.GetIPResponse{Ip: resp.GetIp() ,Clock: resp.GetClock() }, nil
-	}
-	return &pb.GetIPResponse{Clock: []int64{-1},Ip: ""}, nil
+		//Al primer DNS donde encontremos el sitio, retornamos la ip del sitio y su clock
+		return &pb.GetIPResponse{Ip: resp.GetIp() ,Clock: resp.GetClock() }, nil 
+	}// Si no se logra encontrar en ningun DNS, retornamos esto que indicaria al cliente que no encontramos el sitio
+	return &pb.GetIPResponse{Clock: []int64{-1},Ip: ""}, nil 
 }
-
-func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) {
-	/*
-	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure()) 
-	if err != nil {
-		fmt.Println("Problemas al hacer conexion")
-	}
-	defer conn.Close()
-
-	client := pb3.NewDNSServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	msg2 := &pb3.GetClockRequest{Soli: " "} 
-	clock, err := client.GetClock(ctx, msg2)
-	if err != nil {
-		fmt.Println("Error, no esta el server conectado ")
-	}
-	*/
+// Esta funcion retorna la ip del dns que se debe conectar el admin correspondiente
+func (s *server) Broker(ctx context.Context, msg *pb2.BrokerRequest) (*pb2.BrokerResponse, error) { 
+	
 	return &pb2.BrokerResponse{Ip: sendDNSRoute(msg.GetAdmId())}, nil
 }
-
+// FUNCION QUE NO SE USA ACA, PERO SE DEFINE PARA QUE EL PROGRAMA CORRA
 func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
@@ -99,13 +86,15 @@ func giveDNSReset(idn int){//funcion que designa el dns cada vez que se agregue 
 		upRandomizer()
 	}
 }
-func resetDNS(){
+
+// Como se explica en el README, cada vez que se hace un merge se volveran a asignar ips de dns nuevas a cada admin conectado
+func resetDNS(){ 
 	upRandomizer()
 	for i:=0; i<int(id);i++{
 		giveDNSReset(i)
 	}
 }
-func sendDNSRoute(admin int64)string{
+func sendDNSRoute(admin int64)string{ // retorna la ip del dns correspondiente a un admin en especifico (por id)
 	return dns[idadm[admin]]
 }
 
@@ -128,7 +117,7 @@ func (s *server) Append(ctx context.Context, msg *pb2.AppendRequest) (*pb2.Appen
 	return &pb2.DeleteResponse{Status : "recibido" }, nil
 }*/
 
-
+//Con esta funcion, registramos a un admin y le asignamos un id
 func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAdmResponse, error) {
 	id_temp := id
 	giveDNS()
@@ -137,7 +126,7 @@ func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAd
 	return &pb2.RegAdmResponse{Id: id_temp }, nil
 
 }
-
+//Con esta funcion el DNS notifica a broker que se realizo un merge
 func (s *server) NotifyBroker(ctx context.Context, msg *pb3.NotifyBrokerRequest) (*pb3.NotifyBrokerResponse, error) {
 	resetDNS()
 	fmt.Println("Merge realizado: ", idadm)

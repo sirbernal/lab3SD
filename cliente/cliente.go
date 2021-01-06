@@ -30,19 +30,20 @@ func VerifMonotonicRead(oldclk []int64,newclk []int64)int{ //funcion que verific
 	}
 	return 0 //0 actualizar pag
 }
+// En el README explicamos con mas detalles como se respeta el Monotonic Read
 func SearchMonotonicRead(pag string,dir string,clk []int64){
-	for i,j:= range direcciones{
-		if pag==j[0]{
-			verif:=VerifMonotonicRead(clocks[i],clk)
-			if verif==0{
+	for i,j:= range direcciones{ // Recorremos nuestro arreglo en memoria de direcciones consultadas
+		if pag==j[0]{ // Si encontramos en nuestro arreglo la pag
+			verif:=VerifMonotonicRead(clocks[i],clk) // Comparamos los relojes para saber si esta actualizado o no 
+			if verif==0{ // Caso en el que se obtiene version actualizada
 				direcciones[i]=[]string{pag,dir}
 				clocks[i]=clk
 				fmt.Println("Página actualizada a versión más reciente, dirección: "+dir)
 				return
-			}else if verif==1{
+			}else if verif==1{ // caso en el que se obtiene version desactualizada
 				fmt.Println("Versión desactualizada recibida, dirección local: "+j[1])
 				return
-			}else{
+			}else{ // ninguno de los dos casos anteriores, simplemente se recibio la misma version que tenemos en el sistema
 				fmt.Println("Versión al día en sistema, dirección: "+j[1])
 				return
 			}
@@ -52,8 +53,8 @@ func SearchMonotonicRead(pag string,dir string,clk []int64){
 	direcciones=append(direcciones,[]string{pag,dir})
 	clocks=append(clocks,clk)
 }
-func SolicitarIP(direccion string){
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) //genera la conexion con el broker
+func SolicitarIP(direccion string){ // con esta funcion contactamos a broker para que nos envie la ip del sitio solicitado
+	conn, err := grpc.Dial("10.10.28.81:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion con broker, pruebe nuevamente...")
 		return
@@ -71,11 +72,12 @@ func SolicitarIP(direccion string){
 		fmt.Println("Problemas al hacer conexion con broker, pruebe nuevamente...")
 		return
 	}
-	if resp.GetClock()[0]==-1{
+	if resp.GetClock()[0]==-1{ // Si no se encontro en el sistema la pagina, printeamos que no lo encontramos
 		fmt.Println("Página no encontrada")
 		return
 	}
-	SearchMonotonicRead(direccion,resp.GetIp(),resp.GetClock())
+	SearchMonotonicRead(direccion,resp.GetIp(),resp.GetClock()) // Si se encuentra, debemos comprobar que la direccion recibida
+	// no es mas antigua a la ultima leida, para respetar la consistencia
 }
 
 
@@ -84,7 +86,7 @@ func main() {
 	fmt.Print("Hola, puede escribir su opcion: ")
 	for{
 		// Se descompone el string creado para hacer los envios correspondientes
-		text, _ := reader.ReadString('\n')
+		text, _ := reader.ReadString('\n') //
 		str := strings.Split(text, "\n")
 		SolicitarIP(str[0])
 		fmt.Print("Hola, puede escribir su opcion: ")
