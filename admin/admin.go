@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-var dires = []string{"10.10.28.81t:50051"} // direccion del broker
+var dires = []string{"10.10.28.81:50051"} // direccion del broker
 
 var timeout = time.Duration(1)*time.Second // timeout para los envios
 
