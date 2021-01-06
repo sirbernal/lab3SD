@@ -111,7 +111,7 @@ func UpdateFiles(){ //funcion que actualiza o reescribe todos los registros zf e
 	}
 }
 func Merge(){ //funcion que realiza el merge
-	time.Sleep(time.Duration(60)*time.Second)
+	time.Sleep(time.Duration(300)*time.Second)
 	// Avisar a los demas dns que se hara un merge, por lo que ellos enviaran los dominios que ellos posean en registro
 	for i,dire:= range dns{
 		if i == idDNS{
