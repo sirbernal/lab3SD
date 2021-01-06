@@ -19,27 +19,20 @@ type server struct {
 }
 
 var idDNS = 1
-var dominios []string //[com,cl,ez]
-var registro [][]string //[[agregar,borrar,wea],[],[],]
-var pags [][][]string //[[[algo.com,direccion],[xd.com, direccion]],[lel.cl],[]]
-var clocks [][]int64  //[[0,0,1],[0,0,3]]
+var dominios []string //arreglo que guarda los dominios en formato ["cl","com",...]
+var registro [][]string //arreglo que mantiene los registros por dominio[[registros cl],[registros com],...] => [registros cl]=["append a.cl 1.2.3.4", "update u.cl 2.2.2.2"...]
+var pags [][][]string //arreglo que guarda las paginas e ips por dominio[[paginas.cl],[paginas.com],...] =>[paginas.cl]=[["a.cl","1.2.3.4"],["u.cl","2.2.2.2"]]
+var clocks [][]int64  //relojes asociados por dominio [[cl],[com],...] => [cl]=[x,y,z]
 
-func DetectCommand(comm string)[]string{
-	str:= strings.Split(comm, " ")
-	var resp []string
-	resp=append(resp,strings.ToLower(str[0]))
-	resp=append(resp,strings.Join(str[1:]," "))
-	return resp
-}
-func DivideData(data string)[]string{
+func DivideData(data string)[]string{//funcion que divide un string por espacio(solo acorta la funcion para escribir menos y ahorrar tiempo)
 	return strings.Split(data," ")
 }
-func DetectDomain(comm string)string{
+func DetectDomain(comm string)string{ //funcion que detecta el dominio de una pagina ingresada, por ejemplo abc.com => com
 	str:= DivideData(comm)
 	dom:=strings.Split(str[0],".")
 	return dom[1]
 }
-func SearchDomain(dom string)int{
+func SearchDomain(dom string)int{ //funcion que busca la posicion del dominio en el arreglo guardado
 	pos:= -1
 	for i,j :=range dominios{
 		if j==dom{
@@ -60,7 +53,7 @@ func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o camb
 		return true //es cambio de ip
 	}
 }
-func ActReg(pos int){
+func ActReg(pos int){//funcion que actualiza tanto el registro zf del dominio señalado (con el index) como el log de dicho dominio
 	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
 	defer file.Close()
 	if err !=nil{
@@ -89,7 +82,7 @@ func ActReg(pos int){
 }
 
 
-func ReceiveOp(op []string)(){ //operacion,valores
+func ReceiveOp(op []string)(){ //funcion que recibe el comando de admin o del dns 0 en el merge (solo appends)
 	domain:=DetectDomain(op[1])
 	values:=DivideData(op[1])
 	pos:=SearchDomain(domain)
@@ -148,7 +141,7 @@ func ReceiveOp(op []string)(){ //operacion,valores
 	clocks[pos][idDNS]++
 	ActReg(pos)
 }
-func UpdateFiles(){
+func UpdateFiles(){ //funcion que actualiza o reescribe todos los registros zf en todos los dominios despues de un merge
 	for i,_:=range dominios{
 		file,err:= os.OpenFile("RegistroZF"+dominios[i]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
 		defer file.Close()
@@ -165,19 +158,18 @@ func UpdateFiles(){
 		file.Close()
 	}
 }
-func CleanLocalMerge(){
+func CleanLocalMerge(){//funcion que borra todos los archivos locales al inicio o final del merge
 	for _,domain:= range dominios{
 		os.Remove("RegistroZF"+domain+".txt")
 		os.Remove("LOG"+domain+".txt")
 	}
 }
-func InitialClean(){
+func InitialClean(){//funcion que borra lo necesario al iniciar el merge
 	CleanLocalMerge()
 	dominios= []string{}
 	pags= [][][]string{}
-	 //[[[algo.com,direccion],[xd.com, direccion]],[lel.cl],[]]
 }
-func FinalClean(){
+func FinalClean(){//funcion que borra lo necesario al finalizar el merge
 	registro= [][]string{}
 	clocks= [][]int64{}
 	CleanLocalMerge()
@@ -186,9 +178,9 @@ func FinalClean(){
 		registro=append(registro,[]string{})
 	}
 }
-func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {
+func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {//retorna la ip de la pagina solitada por el cliente al broker
 	pag:=msg.GetDireccion()
-	pos:=SearchDomain(DetectDomain(pag)) //por si no encuentra la pag
+	pos:=SearchDomain(DetectDomain(pag)) 
 	for _,j:=range pags[pos]{
 		if j[0]==pag{
 			return &pb3.GetIPBrokerResponse{Clock: clocks[pos],Ip: j[1]}  , nil
@@ -196,7 +188,7 @@ func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (
 	}
 	return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip: ""}  , nil
 }
-func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
+func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {//funcion que recibe el comando del admin
 	ReceiveOp(msg.GetCommand())
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
@@ -217,7 +209,7 @@ func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (
 	}
 	
 }
-func TranslateClock (clk []string)[]int64{
+func TranslateClock (clk []string)[]int64{ //recibe el clock en formato string y lo traduce a int64
 	a:=[]int64{}
 	for _,j:= range clk{
 		b,_:=strconv.ParseInt(j,10,64)
@@ -226,19 +218,19 @@ func TranslateClock (clk []string)[]int64{
 	return a
 }
 
-func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) {
-	if msg.GetType()==0{
+func (s *server) ReceiveChanges(ctx context.Context, msg *pb3.ReceiveChangesRequest) (*pb3.ReceiveChangesResponse, error) {//funcion de recepcion de datos post merge
+	if msg.GetType()==0{//recepcion de pagina inicial
 		InitialClean()
 		ReceiveOp(msg.GetOperations())
 	}
-	if msg.GetType()==1{
+	if msg.GetType()==1{//recepcion de pagina normal
 		ReceiveOp(msg.GetOperations())
 	}
-	if msg.GetType()==2{
+	if msg.GetType()==2{//recepcion de pagina final
 		ReceiveOp(msg.GetOperations())
 		FinalClean()
 	}
-	if msg.GetType()==3{
+	if msg.GetType()==3{//recepcion de clocks
 		clocks=append(clocks,TranslateClock(msg.GetOperations()))
 	}
 	return &pb3.ReceiveChangesResponse{Status: "listo"}  , nil

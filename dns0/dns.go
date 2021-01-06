@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 	"strings"
-//	"bufio"
 	"os"
 	"log"
 	"net"
@@ -20,33 +19,33 @@ import (
 type server struct {
 }
 
-var idDNS = 0
-var dominios []string //[com,cl,ez]
-var registro [][]string //[[agregar,borrar,...],[],[],]
-var pags [][][]string //[[[algo.com,direccion],[xd.com, direccion]],[lel.cl],[]]
-var clocks [][]int64  //[[0,0,1],[0,0,3]]
-var timeout = time.Duration(1)*time.Second
-var dns = []string{"localhost:50052","localhost:50053","localhost:50054"}
-var mergedns [][]string  // se guardan los dominios de los dns para hacer los merges
-var mergereg [][][]string
-var brokerip = "localhost:50051"
-func DetectCommand(comm string)[]string{
+var idDNS = 0 //id del dns correspondiente 
+var dominios []string //arreglo que guarda los dominios en formato ["cl","com",...]
+var registro [][]string //arreglo que mantiene los registros por dominio[[registros cl],[registros com],...] => [registros cl]=["append a.cl 1.2.3.4", "update u.cl 2.2.2.2"...]
+var pags [][][]string //arreglo que guarda las paginas e ips por dominio[[paginas.cl],[paginas.com],...] =>[paginas.cl]=[["a.cl","1.2.3.4"],["u.cl","2.2.2.2"]]
+var clocks [][]int64  //relojes asociados por dominio [[cl],[com],...] => [cl]=[x,y,z]
+var timeout = time.Duration(1)*time.Second //timeout para conexiones
+var dns = []string{"localhost:50052","localhost:50053","localhost:50054"} //ips de los dns
+var mergedns [][]string  // auxiliar donde guardan los dominios de los dns para hacer los merges
+var mergereg [][][]string //auxiliar donde se guardan los registros de los dns para merge 
+var brokerip = "localhost:50051" //ip del broker
+func DetectCommand(comm string)[]string{ //funcion que separa el comando (append... etc) del resto de datos y lo estandariza en minuscula en un arreglo [comando, contenido]
 	str:= strings.Split(comm, " ")
 	var resp []string
 	resp=append(resp,strings.ToLower(str[0]))
 	resp=append(resp,strings.Join(str[1:]," "))
 	return resp
 }
-func DivideData(data string)[]string{
+func DivideData(data string)[]string{ //funcion que divide un string por espacio(solo acorta la funcion para escribir menos y ahorrar tiempo)
 	return strings.Split(data," ")
 }
-func DetectDomain(comm string)string{
+func DetectDomain(comm string)string{ //funcion que detecta el dominio de una pagina ingresada, por ejemplo abc.com => com
 	str:= DivideData(comm)
 	dom:=strings.Split(str[0],".")
 	return dom[1]
 }
-func SearchDomain(dom string)int{
-	pos:= -1
+func SearchDomain(dom string)int{ //funcion que busca la posicion del dominio en el arreglo guardado
+	pos:= -1 //retorna -1 para identificar que el dominio aun no ha sido ingresado
 	for i,j :=range dominios{
 		if j==dom{
 			pos=i
@@ -67,8 +66,8 @@ func DetectUpdate(w string)bool{ //funcion que detecta si es cambio de ip o camb
 		return true //es cambio de ip
 	}
 }
-func ActReg(pos int){
-	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
+func ActReg(pos int){ //funcion que actualiza tanto el registro zf del dominio señalado (con el index) como el log de dicho dominio
+	file,err:= os.OpenFile("RegistroZF"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) 
 	defer file.Close()
 	if err !=nil{
 		os.Exit(1)
@@ -81,7 +80,7 @@ func ActReg(pos int){
 		}
 	}
 	file.Close()
-	file2,err:= os.OpenFile("LOG"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
+	file2,err:= os.OpenFile("LOG"+dominios[pos]+".txt",os.O_CREATE|os.O_WRONLY,0777) 
 	defer file2.Close()
 	if err !=nil{
 		os.Exit(1)
@@ -94,7 +93,7 @@ func ActReg(pos int){
 	}
 	file2.Close()
 }
-func UpdateFiles(){
+func UpdateFiles(){ //funcion que actualiza o reescribe todos los registros zf en todos los dominios despues de un merge
 	for i,_:=range dominios{
 		file,err:= os.OpenFile("RegistroZF"+dominios[i]+".txt",os.O_CREATE|os.O_WRONLY,0777) //abre o genera el archivo de registro
 		defer file.Close()
@@ -111,11 +110,10 @@ func UpdateFiles(){
 		file.Close()
 	}
 }
-func Merge(){
+func Merge(){ //funcion que realiza el merge
 	time.Sleep(time.Duration(60)*time.Second)
 	// Avisar a los demas dns que se hara un merge, por lo que ellos enviaran los dominios que ellos posean en registro
 	for i,dire:= range dns{
-		
 		if i == idDNS{
 			mergedns = append(mergedns, dominios)
 			continue
@@ -142,9 +140,10 @@ func Merge(){
 
 		mergedns = append(mergedns, resp.GetDominios())
 	}
-	for i,_:= range mergedns { //[]dns []dominio []registros
+	//ya con los dominios de todos comienza a solicitar los registros asociados a estos a todos los dominios
+	for i,_:= range mergedns { 
 		mergereg=append(mergereg,[][]string{})
-		for j,_:= range mergedns[i]{//var mergereg [][][]string .. dns0[[registros],[registros]]
+		for j,_:= range mergedns[i]{
 			if i==idDNS{
 				mergereg[i]=append(mergereg[i],registro[j])
 				continue
@@ -165,11 +164,11 @@ func Merge(){
 			mergereg[i]=append(mergereg[i],resp.GetDominios())			
 		}
 	}
-	RealMerge()
-	mergedns=[][]string{}
+	RealMerge() //realiza el merge de forma local en el dns 0
+	mergedns=[][]string{} //vacía los auxiliares para el procesp
 	mergereg=[][][]string{}
-	CleanLocalMerge()
-	for pag,i:=range pags{
+	CleanLocalMerge() //realiza la limpieza de archivos y variables que se requieren post-merge
+	for pag,i:=range pags{ //Procede a enviar las paginas que quedaron luego de realizado el proceso simulando ser un administrador con "append pagina ip" al resto de dns
 		for index,j:= range i{
 			for k,dire:=range dns{
 				if k == idDNS{
@@ -187,10 +186,10 @@ func Merge(){
 				defer cancel()
 				tipo:=int64(1)
 				if pag== 0 && index == 0{
-					tipo=0
+					tipo=0 //si es la primera pagina avisa para el primer clean a cada dns
 				}
 				if pag==len(pags)-1 && index==len(i)-1{
-					tipo=2
+					tipo=2 //si es la ultima pagina avisa para el ultimo clean de cada dns
 				}
 				msg:= &pb3.ReceiveChangesRequest{Operations: []string{"append",j[0]+" "+j[1]}, Type: tipo} 
 				_, err = client.ReceiveChanges(ctx, msg)
@@ -200,7 +199,7 @@ func Merge(){
 			}
 		}
 	}
-	for _,i:=range clocks{
+	for _,i:=range clocks{//procede a enviar los clocks para mantener la consistencia
 		for k,dire:=range dns{
 			if k == idDNS{
 				continue
@@ -245,7 +244,7 @@ func Merge(){
 }
 }
 
-func TranslateClock (clk []int64)[]string{
+func TranslateClock (clk []int64)[]string{ //traduce el clock de int64 a string para merge
 	a:=[]string{}
 	for _,j:= range clk{
 		b:=strconv.FormatInt(j,10)
@@ -253,7 +252,7 @@ func TranslateClock (clk []int64)[]string{
 	}
 	return a
 }
-func RealMerge(){
+func RealMerge(){ //funcion que realiza el merge interno
 	set0:= make(map[string]bool)//arreglo que guarda direcciones reservadas por prioridad del dns0
 	set1:= make(map[string]bool) //arreglo que guarda direcciones reservadas por prioridad del dns1
 	for _,i:=range mergereg[0]{ //se guardan las direcciones editadas por dns0
@@ -262,34 +261,34 @@ func RealMerge(){
 			set0[value[1]]=true
 		}
 	}
-	//Se hara revision del dns 1
+	//Se hace revision del dns 1
 	for _,i:=range mergereg[1]{
 		for _,j:= range i{
 			values:=DivideData(j)
-			if set0[values[1]]{
+			if set0[values[1]]{//si es una direccion reservada en dns0 solo actualiza el clock
 				domain:=DetectDomain(values[1])
 				pos:=SearchDomain(domain)
 				clocks[pos][1]++
 				continue
 			}
-			set1[values[1]]=true
-			ReceiveOp(DetectCommand(j),1)
+			set1[values[1]]=true //reserva la pagina
+			ReceiveOp(DetectCommand(j),1) //realiza la accion en dns0
 		}
 	}
 	for _,i:=range mergereg[2]{
 		for _,j:= range i{
 			values:=DivideData(j)
-			if set0[values[1]]||set1[values[1]]{
+			if set0[values[1]]||set1[values[1]]{//si es una direccion reservada en dns0 o dns1 solo actualiza el clock
 				domain:=DetectDomain(values[1])
 				pos:=SearchDomain(domain)
 				clocks[pos][2]++
 				continue
 			}
-			ReceiveOp(DetectCommand(j),2)
+			ReceiveOp(DetectCommand(j),2) //realiza la accion en dns0
 		}
 	}
 }
-func CleanLocalMerge(){
+func CleanLocalMerge(){//realiza la limpieza de variables y archivos post merge y actualiza los archivos
 	registro= [][]string{}
 	for _,_= range dominios{
 		registro=append(registro,[]string{})
@@ -300,7 +299,7 @@ func CleanLocalMerge(){
 	}
 	UpdateFiles()
 }
-func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
+func ReceiveOp(op []string, dnsid int)(){ //funcion que recibe el comando de admin (id 0) u otro dns en el merge (id del dns de origen)
 	domain:=DetectDomain(op[1])
 	values:=DivideData(op[1])
 	pos:=SearchDomain(domain)
@@ -359,7 +358,7 @@ func ReceiveOp(op []string, dnsid int)(){ //operacion,valores
 	clocks[pos][dnsid]++
 	ActReg(pos)
 }
-func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {
+func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) { //retorna la ip de la pagina solitada por el cliente al broker
 	pag:=msg.GetDireccion()
 	pos:=SearchDomain(DetectDomain(pag)) //por si no encuentra la pag
 	for _,j:=range pags[pos]{
@@ -367,11 +366,11 @@ func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (
 			return &pb3.GetIPBrokerResponse{Clock: clocks[pos],Ip: j[1]}  , nil
 		}
 	}
-	return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip:""}  , nil
+	return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip:""}  , nil //retorna nulo si no lo encuentra
 }
 
-func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {
-	ReceiveOp(msg.GetCommand(),0)
+func (s *server) DnsCommand(ctx context.Context, msg *pb2.DnsCommandRequest) (*pb2.DnsCommandResponse, error) {//funcion que recibe el comando del admin
+	ReceiveOp(msg.GetCommand(),0) 
 	return &pb2.DnsCommandResponse{Clock: []int64{} }, nil
 }
 
@@ -382,7 +381,7 @@ func (s *server) RegAdm(ctx context.Context, msg *pb2.RegAdmRequest) (*pb2.RegAd
 	return &pb2.RegAdmResponse{Id: 0 }, nil
 }
 
-func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) {
+func (s *server) SendChanges(ctx context.Context, msg *pb3.SendChangesRequest) (*pb3.SendChangesResponse, error) { //canal de envio usado en merge
 	if msg.GetSoli()=="Merge"{
 		return &pb3.SendChangesResponse{Dominios: dominios}  , nil
 	}else{

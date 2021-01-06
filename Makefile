@@ -7,24 +7,28 @@ grpc:
 
 protos: grpc
 	protoc --proto_path=. --go_out=plugins=grpc:proto proto/ClientService.proto
-	protoc --proto_path=. --go_out=plugins=grpc:proto proto/NodeService.proto
+	protoc --proto_path=. --go_out=plugins=grpc:proto proto/DNSService.proto
+	protoc --proto_path=. --go_out=plugins=grpc:proto proto/AdminService.proto
 
 runc:
 	cd cliente && \
 	go run cliente.go
 
+rund0:
+	cd dns0 && \
+	go run dns.go
+
 rund1:
-	cd datanode1 && \
-	go run datanode.go
+	cd dns1 && \
+	go run dns.go
 
 rund2:
-	cd datanode2 && \
-	go run datanode.go
+	cd dns2 && \
+	go run dns.go
 
-rund3:
-	cd datanode3 && \
-	go run datanode.go
-
-runn:
-	cd namenode && \
-	go run namenode.go            
+runb:
+	cd broker && \
+	go run broker.go            
+runa:
+	cd admin && \
+	go run admin.go      
