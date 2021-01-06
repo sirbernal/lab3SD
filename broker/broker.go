@@ -15,6 +15,7 @@ import (
 var timeout = time.Duration(1)*time.Second //definimos el timeout
 var id = int64(0) // variable contador de ids para asignarles a los admins
 var idadm []int64 // se guarda en ip del dns en el index correspondiente al id de algun admin 
+//var dns = []string{"localhost:50052","localhost:50053","localhost:50054"} 
 var dns = []string{"10.10.28.82:50052","10.10.28.83:50053","10.10.28.84:50054"} // direcciones de los dns
 var randomizer []int
 var randoclient []int

@@ -15,6 +15,13 @@ var timeout = time.Duration(1)*time.Second //variable para timeout en conexiones
 var direcciones [][]string //[[google, ip]...] //guarda las direcciones que han sido solicitadas con su respectiva ip
 var clocks [][]int64 //[clock de google, ...] //guarda los relojes asociados a la página
 
+func DetectCommand(comm string)[]string{ // Funcion que sirve para detectar especificamente comandos
+	str:= strings.Split(comm, " ")
+	var resp []string
+	resp=append(resp,strings.ToLower(str[0]))
+	resp=append(resp,strings.Join(str[1:]," "))
+	return resp
+}
 func VerifMonotonicRead(oldclk []int64,newclk []int64)int{ //funcion que verifica el reloj actual de la página en caso de tener 
 	igual:=0 
 	for i:=0;i<3;i++{
@@ -54,6 +61,7 @@ func SearchMonotonicRead(pag string,dir string,clk []int64){
 	clocks=append(clocks,clk)
 }
 func SolicitarIP(direccion string){ // con esta funcion contactamos a broker para que nos envie la ip del sitio solicitado
+	//conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	conn, err := grpc.Dial("10.10.28.81:50051", grpc.WithInsecure()) //genera la conexion con el broker
 	if err != nil {
 		fmt.Println("Problemas al hacer conexion con broker, pruebe nuevamente...")
@@ -84,11 +92,25 @@ func SolicitarIP(direccion string){ // con esta funcion contactamos a broker par
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Hola, puede escribir su opcion: ")
-	for{
-		// Se descompone el string creado para hacer los envios correspondientes
-		text, _ := reader.ReadString('\n') //
-		str := strings.Split(text, "\n")
-		SolicitarIP(str[0])
-		fmt.Print("Hola, puede escribir su opcion: ")
-	}
+	Menu:
+		for{
+			// Se descompone el string creado para hacer los envios correspondientes
+			text, _ := reader.ReadString('\n') //
+			str := strings.Split(text, "\n")
+			str2 := DetectCommand(str[0])
+			switch str2[0]{
+			case "connect","get":
+				if len(strings.Split(str2[1],"."))==2{
+					SolicitarIP(str2[1])
+				}else{
+					fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
+					continue Menu
+				}
+			default:
+				fmt.Print("Ingreso de comando no válido, pruebe nuevamente: ")
+				continue Menu
+			}
+			
+			fmt.Print("Hola, puede escribir su opcion: ")
+		}
 }

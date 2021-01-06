@@ -181,6 +181,9 @@ func FinalClean(){//funcion que borra lo necesario al finalizar el merge
 func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) {//retorna la ip de la pagina solitada por el cliente al broker
 	pag:=msg.GetDireccion()
 	pos:=SearchDomain(DetectDomain(pag)) 
+	if pos==-1{
+		return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip:""}  , nil
+	}
 	for _,j:=range pags[pos]{
 		if j[0]==pag{
 			return &pb3.GetIPBrokerResponse{Clock: clocks[pos],Ip: j[1]}  , nil

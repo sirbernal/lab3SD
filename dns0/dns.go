@@ -25,7 +25,8 @@ var registro [][]string //arreglo que mantiene los registros por dominio[[regist
 var pags [][][]string //arreglo que guarda las paginas e ips por dominio[[paginas.cl],[paginas.com],...] =>[paginas.cl]=[["a.cl","1.2.3.4"],["u.cl","2.2.2.2"]]
 var clocks [][]int64  //relojes asociados por dominio [[cl],[com],...] => [cl]=[x,y,z]
 var timeout = time.Duration(1)*time.Second //timeout para conexiones
-var dns = []string{"10.10.28.82:50052","10.10.28.83:50053","10.10.28.84:50054"} //ips de los dns
+var dns = []string{"localhost:50052","localhost:50053","localhost:50054"} 
+//var dns = []string{"10.10.28.82:50052","10.10.28.83:50053","10.10.28.84:50054"} //ips de los dns
 var mergedns [][]string  // auxiliar donde guardan los dominios de los dns para hacer los merges
 var mergereg [][][]string //auxiliar donde se guardan los registros de los dns para merge 
 var brokerip = "10.10.28.81:50051" //ip del broker
@@ -361,6 +362,9 @@ func ReceiveOp(op []string, dnsid int)(){ //funcion que recibe el comando de adm
 func (s *server) GetIPBroker(ctx context.Context, msg *pb3.GetIPBrokerRequest) (*pb3.GetIPBrokerResponse, error) { //retorna la ip de la pagina solitada por el cliente al broker
 	pag:=msg.GetDireccion()
 	pos:=SearchDomain(DetectDomain(pag)) //por si no encuentra la pag
+	if pos==-1{
+		return &pb3.GetIPBrokerResponse{Clock: []int64{-1},Ip:""}  , nil
+	}
 	for _,j:=range pags[pos]{
 		if j[0]==pag{
 			return &pb3.GetIPBrokerResponse{Clock: clocks[pos],Ip: j[1]}  , nil
